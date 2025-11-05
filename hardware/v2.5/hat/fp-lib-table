@@ -1,0 +1,5 @@
+(fp_lib_table
+  (version 7)
+  (lib (name "Planktoscope-Hat")(type "KiCad")(uri "$(KIPRJMOD)/Planktoscope-Hat.pretty")(options "")(descr ""))
+  (lib (name "mioss")(type "KiCad")(uri "/home/alex/Alex/nube/investigacion/doctorado/BOYA/pcb/7.0/footprints/mioss.pretty")(options "")(descr ""))
+)

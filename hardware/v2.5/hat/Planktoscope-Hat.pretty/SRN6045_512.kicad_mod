@@ -1,0 +1,72 @@
+(footprint "SRN6045_512"
+	(version 20241229)
+	(generator "pcbnew")
+	(generator_version "9.0")
+	(layer "F.Cu")
+	(descr "SRN6045 series  footprint\n\nRoughly based on the recommendation in this http://www.mouser.com/ds/2/54/RN6045-778135.pdf datasheet.")
+	(property "Reference" "REF**"
+		(at 0 0 0)
+		(layer "F.SilkS")
+		(uuid "73e7b4dc-4c69-467d-8848-e1463681f881")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" ""
+		(at 0 0 0)
+		(layer "UNDEFINED")
+		(uuid "04dd1940-b652-4ca7-b032-7b91a42e1131")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "ed397153-6f16-4823-98af-0d8b7e6f8720")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "a359c032-c95d-42c4-8a53-bfb7a6dc7841")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(pad "1" smd rect
+		(at -2.175 0 90)
+		(size 6 2.5)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(solder_mask_margin 0.0635)
+		(solder_paste_margin 0)
+		(thermal_bridge_angle 0)
+		(uuid "040df7d8-9ab0-4d11-9672-58fa6e49c77c")
+	)
+	(pad "2" smd rect
+		(at 2.125 0 90)
+		(size 6 2.5)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(solder_mask_margin 0.0635)
+		(solder_paste_margin 0)
+		(thermal_bridge_angle 0)
+		(uuid "35e53e81-26fc-4fd8-8c80-bdbe67035820")
+	)
+	(embedded_fonts no)
+)

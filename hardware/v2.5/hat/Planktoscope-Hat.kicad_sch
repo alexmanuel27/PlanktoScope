@@ -168,6 +168,210 @@
 			)
 			(embedded_fonts no)
 		)
+		(symbol "Connector:Conn_01x03_Pin"
+			(pin_names
+				(offset 1.016)
+				(hide yes)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "J"
+				(at 0 5.08 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "Conn_01x03_Pin"
+				(at 0 -5.08 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" "~"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "Generic connector, single row, 01x03, script generated"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_locked" ""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "connector"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_fp_filters" "Connector*:*_1x??_*"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "Conn_01x03_Pin_1_1"
+				(rectangle
+					(start 0.8636 2.667)
+					(end 0 2.413)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(rectangle
+					(start 0.8636 0.127)
+					(end 0 -0.127)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(rectangle
+					(start 0.8636 -2.413)
+					(end 0 -2.667)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(polyline
+					(pts
+						(xy 1.27 2.54) (xy 0.8636 2.54)
+					)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 1.27 0) (xy 0.8636 0)
+					)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 1.27 -2.54) (xy 0.8636 -2.54)
+					)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(pin passive line
+					(at 5.08 2.54 180)
+					(length 3.81)
+					(name "Pin_1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 5.08 0 180)
+					(length 3.81)
+					(name "Pin_2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 5.08 -2.54 180)
+					(length 3.81)
+					(name "Pin_3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
 		(symbol "Connector:Conn_01x04_Pin"
 			(pin_names
 				(offset 1.016)
@@ -979,134 +1183,6 @@
 						(effects
 							(font
 								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-			)
-			(embedded_fonts no)
-		)
-		(symbol "Planktoscope-Hat-eagle-import:+12V"
-			(power)
-			(exclude_from_sim no)
-			(in_bom yes)
-			(on_board yes)
-			(property "Reference" "#P+"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Value" ""
-				(at -2.54 -5.08 90)
-				(effects
-					(font
-						(size 1.778 1.5113)
-					)
-					(justify left bottom)
-				)
-			)
-			(property "Footprint" ""
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Datasheet" ""
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Description" "SUPPLY SYMBOL"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "ki_locked" ""
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(symbol "+12V_1_0"
-				(polyline
-					(pts
-						(xy 0 1.27) (xy -1.27 -0.635)
-					)
-					(stroke
-						(width 0.254)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 0 0) (xy -1.27 -1.905)
-					)
-					(stroke
-						(width 0.254)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 1.27 -0.635) (xy 0 1.27)
-					)
-					(stroke
-						(width 0.254)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 1.27 -1.905) (xy 0 0)
-					)
-					(stroke
-						(width 0.254)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(pin power_in line
-					(at 0 -2.54 90)
-					(length 2.54)
-					(name "+12V"
-						(effects
-							(font
-								(size 0 0)
-							)
-						)
-					)
-					(number "1"
-						(effects
-							(font
-								(size 0 0)
 							)
 						)
 					)
@@ -4240,6 +4316,18 @@
 		(uuid 076b3ac4-d0d6-4249-a751-9d70abce6ebe)
 	)
 	(rectangle
+		(start 255.27 11.43)
+		(end 332.74 59.69)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(fill
+			(type none)
+		)
+		(uuid 2005690b-11be-4a36-8b29-1ed8873be806)
+	)
+	(rectangle
 		(start 90.17 11.43)
 		(end 179.07 114.3)
 		(stroke
@@ -4435,6 +4523,22 @@
 		(color 0 0 0 0)
 		(uuid "fbf2c2ca-45ed-43db-8f6a-c1bb511d82d0")
 	)
+	(no_connect
+		(at 147.32 95.25)
+		(uuid "5edbb57a-eef8-4393-8d39-4e98174d474a")
+	)
+	(no_connect
+		(at 144.78 48.26)
+		(uuid "74005d87-5c69-41ce-90c3-298e7598d25d")
+	)
+	(no_connect
+		(at 147.32 92.71)
+		(uuid "7c24223a-2d99-4a85-ad26-66c1f0483e3b")
+	)
+	(no_connect
+		(at 144.78 50.8)
+		(uuid "8224157c-e4e0-43aa-b85d-345fcdfd2983")
+	)
 	(wire
 		(pts
 			(xy 266.7 81.28) (xy 266.7 86.36)
@@ -4494,6 +4598,16 @@
 			(type solid)
 		)
 		(uuid "0a7299ed-0935-48ae-8606-92d6d78c97b4")
+	)
+	(wire
+		(pts
+			(xy 280.67 33.02) (xy 280.67 38.1)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "116591d9-6a2d-4337-867e-7d965ad99c62")
 	)
 	(wire
 		(pts
@@ -4757,6 +4871,26 @@
 	)
 	(wire
 		(pts
+			(xy 287.02 38.1) (xy 287.02 34.29)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "598e24ee-cb4c-4a2b-9b3f-0632fdcbc1b7")
+	)
+	(wire
+		(pts
+			(xy 292.1 38.1) (xy 292.1 34.29)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "5993a331-af62-4a2a-a963-7bd718354da9")
+	)
+	(wire
+		(pts
 			(xy 55.88 45.72) (xy 60.96 45.72)
 		)
 		(stroke
@@ -5004,6 +5138,16 @@
 			(type solid)
 		)
 		(uuid "909d8424-c57f-46b7-81ab-533a3bca0069")
+	)
+	(wire
+		(pts
+			(xy 289.56 34.29) (xy 289.56 41.91)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "935e448b-4a6b-4e49-a160-08ea7caa0883")
 	)
 	(wire
 		(pts
@@ -5554,6 +5698,16 @@
 			(type default)
 		)
 		(uuid "fb876fa7-56f7-41a4-9e6e-655639b029ed")
+	)
+	(wire
+		(pts
+			(xy 280.67 38.1) (xy 287.02 38.1)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "fd3b73b5-3120-4bfb-9a86-b5f3a605f033")
 	)
 	(wire
 		(pts
@@ -8401,6 +8555,16 @@
 		)
 		(uuid "289d481a-c31b-43e9-842e-b3886fa64ed8")
 	)
+	(label "UART_TX"
+		(at 292.1 38.1 0)
+		(effects
+			(font
+				(size 0.889 0.889)
+			)
+			(justify left bottom)
+		)
+		(uuid "2999535d-2d70-448b-9832-218de6d86429")
+	)
 	(label "GPIO5"
 		(at 231.14 99.06 0)
 		(effects
@@ -9052,6 +9216,76 @@
 			(project ""
 				(path "/92eacef2-46bd-459d-a417-3c52aed61bba"
 					(reference "#GND30")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:Conn_01x03_Pin")
+		(at 289.56 29.21 270)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "27249ad8-2c30-436d-babd-c596f060ba50")
+		(property "Reference" "J4"
+			(at 289.56 24.13 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "FAN"
+			(at 293.37 18.542 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Horizontal"
+			(at 289.56 29.21 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 289.56 29.21 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Generic connector, single row, 01x03, script generated"
+			(at 289.56 29.21 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "e6aec0d4-5a10-4116-8ce7-d1bd3e0a75a5")
+		)
+		(pin "3"
+			(uuid "3c0e5442-dd14-4d83-b032-651318087141")
+		)
+		(pin "2"
+			(uuid "711ac078-5667-48f9-8306-94110803f334")
+		)
+		(instances
+			(project ""
+				(path "/92eacef2-46bd-459d-a417-3c52aed61bba"
+					(reference "J4")
 					(unit 1)
 				)
 			)
@@ -10416,71 +10650,6 @@
 		)
 	)
 	(symbol
-		(lib_id "Planktoscope-Hat-eagle-import:+12V")
-		(at 109.22 30.48 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "88c2136a-3189-49d9-a658-961574dc2e93")
-		(property "Reference" "#P+4"
-			(at 109.22 30.48 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Value" "+12V"
-			(at 109.982 26.924 90)
-			(effects
-				(font
-					(size 1.778 1.5113)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 109.22 30.48 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 109.22 30.48 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" ""
-			(at 109.22 30.48 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "afd0d310-b310-40a9-98bc-cffd7e26461d")
-		)
-		(instances
-			(project ""
-				(path "/92eacef2-46bd-459d-a417-3c52aed61bba"
-					(reference "#P+4")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "Planktoscope-Hat-eagle-import:RESISTOR_0805MP")
 		(at 220.98 93.98 90)
 		(unit 1)
@@ -10550,16 +10719,16 @@
 		)
 	)
 	(symbol
-		(lib_id "Planktoscope-Hat-eagle-import:+12V")
-		(at 111.76 74.93 0)
+		(lib_id "power:+12V")
+		(at 111.76 77.47 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "a25e88bc-1483-4df4-ab25-0cfe8b458bee")
-		(property "Reference" "#P+10"
-			(at 111.76 74.93 0)
+		(uuid "9f74cded-c55f-42aa-96fc-710aeb7a9b27")
+		(property "Reference" "#PWR04"
+			(at 111.76 81.28 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10568,15 +10737,15 @@
 			)
 		)
 		(property "Value" "+12V"
-			(at 111.76 68.834 90)
+			(at 111.76 72.39 0)
 			(effects
 				(font
-					(size 1.778 1.5113)
+					(size 1.27 1.27)
 				)
 			)
 		)
 		(property "Footprint" ""
-			(at 111.76 74.93 0)
+			(at 111.76 77.47 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10585,7 +10754,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 111.76 74.93 0)
+			(at 111.76 77.47 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10593,8 +10762,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
-			(at 111.76 74.93 0)
+		(property "Description" "Power symbol creates a global label with name \"+12V\""
+			(at 111.76 77.47 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10603,12 +10772,12 @@
 			)
 		)
 		(pin "1"
-			(uuid "13e0f1fa-ebfb-40ee-bd0b-09cee55c0750")
+			(uuid "d3efa300-875b-496f-a3be-1b3e38a1206f")
 		)
 		(instances
-			(project ""
+			(project "Planktoscope-Hat"
 				(path "/92eacef2-46bd-459d-a417-3c52aed61bba"
-					(reference "#P+10")
+					(reference "#PWR04")
 					(unit 1)
 				)
 			)
@@ -10726,6 +10895,201 @@
 			(project ""
 				(path "/92eacef2-46bd-459d-a417-3c52aed61bba"
 					(reference "CTRL1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:+12V")
+		(at 109.22 33.02 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "a789a4e6-c1f5-4c4d-952e-78e9c1db4025")
+		(property "Reference" "#PWR02"
+			(at 109.22 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "+12V"
+			(at 109.22 27.94 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 109.22 33.02 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 109.22 33.02 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"+12V\""
+			(at 109.22 33.02 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "e1d44039-db6a-44e7-8dad-8f685daedf38")
+		)
+		(instances
+			(project "Planktoscope-Hat"
+				(path "/92eacef2-46bd-459d-a417-3c52aed61bba"
+					(reference "#PWR02")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 289.56 41.91 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "ae214674-6256-4fef-9b3c-586483ce8a5f")
+		(property "Reference" "#PWR01"
+			(at 289.56 48.26 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 286.004 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 289.56 41.91 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 289.56 41.91 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 289.56 41.91 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "b9cd6e3a-2c6a-47f0-ab4e-8c2247514d95")
+		)
+		(instances
+			(project "Planktoscope-Hat"
+				(path "/92eacef2-46bd-459d-a417-3c52aed61bba"
+					(reference "#PWR01")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Planktoscope-Hat-eagle-import:+5V/1")
+		(at 280.67 30.48 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "b06b3cc0-26c3-4926-b203-f0ba83c68230")
+		(property "Reference" "#SUPPLY04"
+			(at 280.67 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "+5V/1"
+			(at 280.035 24.765 0)
+			(effects
+				(font
+					(size 1.778 1.5113)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 280.67 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 280.67 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 280.67 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "174fd2ed-e9f5-40fa-9776-34a8f26d55e5")
+		)
+		(instances
+			(project "Planktoscope-Hat"
+				(path "/92eacef2-46bd-459d-a417-3c52aed61bba"
+					(reference "#SUPPLY04")
 					(unit 1)
 				)
 			)

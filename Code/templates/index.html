@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PlanktoScope</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<button id="menu-toggle">☰ Menu</button>
+<div id="overlay"></div>
+
+<div class="container">
+  <nav id="sidebar">
+    <h2>PlanktoScope</h2>
+    <a href="#" onclick="app.showView('samples')">Samples</a>
+    <a href="#" onclick="app.showView('live')">Live View</a>
+    <a href="#" onclick="app.showView('settings')">Settings</a>
+  </nav>
+
+  <main>
+    <!-- Samples View -->
+    <div id="view-samples" class="view">
+      <h1>Sample Library</h1>
+      <div class="btn-group">
+        <a href="/download/all" class="btn">Download All</a>
+      </div>
+      <table>
+        <thead>
+          <tr><th>ID</th><th>Timestamp</th><th>Type</th><th>Actions</th></tr>
+        </thead>
+        <tbody id="samplesBody">
+          <tr><td colspan="4">Loading samples...</td></tr>
+        </tbody>
+      </table>
+      <!-- ❌ Consola eliminada de esta vista -->
+    </div>
+
+    <!-- Live View -->
+    <div id="view-live" class="view">
+      <h1>Live View</h1>
+      <div style="text-align: center;">
+        <img src="/video_feed" alt="Live Stream" class="video-feed">
+        <div class="focus-controls">
+          <button class="btn" onclick="app.focusMotor('out')">–</button>
+          <span id="focus-value">50</span>
+          <button class="btn" onclick="app.focusMotor('in')">+</button>
+          <span>Focus Step</span>
+        </div>
+      </div>
+      <div class="btn-group live-buttons">
+        <button class="btn" onclick="app.capturePhoto()">Capture Photo</button>
+        <button class="btn" id="videoBtn" onclick="app.toggleVideo()">Start Video</button>
+        <button class="btn take-sample" onclick="app.takeSample()">Take Sample</button>
+      </div>
+      <h2>Live Console</h2>
+      <div id="live-console" class="console">Awaiting commands...</div>
+    </div>
+
+    <!-- Settings (placeholder) -->
+    <div id="view-settings" class="view">
+      <h1>Settings</h1>
+      <p>System and camera configuration.</p>
+    </div>
+  </main>
+</div>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

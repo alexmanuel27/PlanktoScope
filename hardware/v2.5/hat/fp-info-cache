@@ -1,4 +1,4 @@
-26857453212642832
+26868040249749684
 Audio_Module
 Reverb_BTDR-1H
 Digital Reverberation Unit, http://www.belton.co.kr/inc/downfile.php?seq=17&file=pdf (footprint from http://www.uk-electronic.de/PDF/BTDR-1.pdf)
@@ -106614,8 +106614,22 @@ C12880MA
 
 
 0
+10
+10
+mioss
+C12880MA+AS7331
+
+
+0
+11
+11
+mioss
+C12880MA_SMD
+
+
+0
 16
-16
+11
 mioss
 Conector 12v smd
 
@@ -106673,6 +106687,20 @@ as5600
 7
 7
 mioss
+as7331
+
+
+0
+8
+8
+mioss
+as7331_SMD
+
+
+0
+8
+8
+mioss
 dc-dc up
 
 
@@ -106686,6 +106714,20 @@ espoleta
 0
 0
 0
+mioss
+led azul SMD
+
+
+0
+2
+2
+mioss
+led_12v
+
+
+0
+2
+2
 mioss
 mio
 

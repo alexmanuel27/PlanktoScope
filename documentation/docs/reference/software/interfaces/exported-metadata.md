@@ -1,3 +1,0 @@
-# Exported Metadata
-
-TODO

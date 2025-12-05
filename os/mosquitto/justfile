@@ -1,5 +1,0 @@
-setup:
-    sudo apt install -y mosquitto
-    sudo cp mosquitto.conf /etc/mosquitto/
-    sudo systemctl reenable mosquitto
-    sudo systemctl restart mosquitto

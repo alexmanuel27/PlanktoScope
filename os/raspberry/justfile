@@ -1,8 +1,0 @@
-setup:
-    ./firmware.sh
-    ./raspi-config.sh
-    ./bootloader.sh
-
-test:
-    validator boot.ini
-    validator config.ini

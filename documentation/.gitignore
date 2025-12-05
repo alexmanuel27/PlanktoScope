@@ -1,5 +1,0 @@
-# Built mkdocs site
-site/
-
-# Cache for mkdocs-material plugins
-.cache/

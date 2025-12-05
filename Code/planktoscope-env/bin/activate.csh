@@ -9,17 +9,17 @@ alias deactivate 'test $?_OLD_VIRTUAL_PATH != 0 && setenv PATH "$_OLD_VIRTUAL_PA
 # Unset irrelevant variables.
 deactivate nondestructive
 
-setenv VIRTUAL_ENV '/home/alex/Alex/repositorios online/PlanktoScope/Code/planktoscope-env'
+setenv VIRTUAL_ENV /home/alex/PlanktoScope/Code/planktoscope-env
 
 set _OLD_VIRTUAL_PATH="$PATH"
 setenv PATH "$VIRTUAL_ENV/"bin":$PATH"
+setenv VIRTUAL_ENV_PROMPT planktoscope-env
 
 
 set _OLD_VIRTUAL_PROMPT="$prompt"
 
 if (! "$?VIRTUAL_ENV_DISABLE_PROMPT") then
-    set prompt = '(planktoscope-env) '"$prompt"
-    setenv VIRTUAL_ENV_PROMPT '(planktoscope-env) '
+    set prompt = "("planktoscope-env") $prompt:q"
 endif
 
 alias pydoc python -m pydoc

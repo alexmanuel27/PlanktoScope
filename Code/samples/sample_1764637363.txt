@@ -1,0 +1,2 @@
+Chlorophyll-a: 4.2 µg/L
+Timestamp: 2025-12-02 01:02:43.376335

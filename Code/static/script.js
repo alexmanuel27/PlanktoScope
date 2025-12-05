@@ -1,63 +1,44 @@
-// script.js — PlanktoScope frontend
 const app = {
   currentView: 'samples',
   videoActive: false,
 
-  // Cambiar vista
   showView(viewName) {
     document.querySelectorAll('.view').forEach(el => el.style.display = 'none');
     const target = document.getElementById('view-' + viewName);
     if (target) target.style.display = 'block';
     this.currentView = viewName;
-
-    // Actualizar menú activo
     document.querySelectorAll('#sidebar a').forEach(a => a.classList.remove('active'));
     event.target.classList.add('active');
-
-    // Cargar muestras si es la vista correcta
-    if (viewName === 'samples') {
-      this.loadSamples();
-    }
-
-    // Conectar consola solo en Live View
-    if (viewName === 'live') {
-      this.connectLiveConsole();
-    }
+    if (viewName === 'samples') this.loadSamples();
+    if (viewName === 'live') this.connectLiveConsole();
+    if (viewName === 'settings') this.loadConfig();
   },
 
-  // Cargar lista de archivos desde /samples
-  async loadSamples() {
+  loadSamples() {
     const body = document.getElementById("samplesBody");
     if (!body) return;
-    try {
-      const res = await fetch("/api/samples");
-      const files = await res.json();
-      body.innerHTML = files.length ? files.map(f => `
-        <tr>
-          <td>${f.id}</td>
-          <td>${f.time}</td>
-          <td>${f.type}</td>
-          <td><a href="/download/${encodeURIComponent(f.id)}" class="btn">Download</a></td>
-        </tr>
-      `).join('') : '<tr><td colspan="4" style="text-align:center;">No files</td></tr>';
-    } catch (err) {
-      body.innerHTML = `<tr><td colspan="4" style="color:#ef4444;">Load error: ${err.message}</td></tr>`;
-    }
+    fetch("/api/samples")
+      .then(res => res.json())
+      .then(samples => {
+        body.innerHTML = samples.length ? samples.map(s => `
+          <tr>
+            <td>${s.id}</td>
+            <td>${s.time}</td>
+            <td>${s.type}</td>
+            <td><a href="/download/${encodeURIComponent(s.id)}" class="btn">Download</a></td>
+          </tr>
+        `).join('') : '<tr><td colspan="4">No samples</td></tr>';
+      })
+      .catch(err => {
+        body.innerHTML = `<tr><td colspan="4" style="color:#ef4444;">Load error: ${err.message}</td></tr>`;
+      });
   },
 
-  // Conectar solo la consola de Live View
   connectLiveConsole() {
     const consoleEl = document.getElementById("live-console");
     if (!consoleEl) return;
-
-    // Limpiar consola anterior
     consoleEl.innerHTML = "Connecting...";
-
-    // Cerrar conexión previa si existe
-    if (this.eventSource) {
-      this.eventSource.close();
-    }
-
+    if (this.eventSource) this.eventSource.close();
     this.eventSource = new EventSource("/api/console/stream");
     this.eventSource.onmessage = (e) => {
       const line = document.createElement("div");
@@ -65,51 +46,47 @@ const app = {
       consoleEl.appendChild(line);
       consoleEl.scrollTop = consoleEl.scrollHeight;
     };
-    this.eventSource.onerror = () => {
-      if (consoleEl.textContent.includes("Connecting")) {
-        consoleEl.textContent = "[Error] Console disconnected.";
-      }
-    };
   },
 
-  // Controles de cámara
-  async focusMotor(dir) {
-    const res = await fetch(`/api/focus/${dir}`);
-    const data = await res.json();
-    document.getElementById("focus-value").textContent = data.step;
-    this.logLive(`Focus step: ${data.step}`);
+  focusMotor(dir) {
+    fetch(`/api/focus/${dir}`)
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("focus-value").textContent = data.step;
+        this.logLive(`Focus step: ${data.step}`);
+      });
   },
 
-  async capturePhoto() {
+  capturePhoto() {
     this.logLive("Capturing photo...");
-    const res = await fetch("/api/capture/photo");
-    const data = await res.json();
-    this.logLive(data.status === "ok" ? `Photo saved: ${data.file}` : "Capture failed");
-    if (this.currentView === "samples") this.loadSamples();
+    fetch("/api/capture/photo")
+      .then(res => res.json())
+      .then(data => {
+        this.logLive(data.status === "ok" ? `Photo saved: ${data.file}` : "Capture failed");
+        if (this.currentView === "samples") this.loadSamples();
+      });
   },
 
-  async toggleVideo() {
+  toggleVideo() {
     const btn = document.getElementById("videoBtn");
-    if (!this.videoActive) {
-      await fetch("/api/capture/video/start");
-      this.videoActive = true;
-      btn.textContent = "Stop Video";
-      btn.style.background = "#ef4444";
-    } else {
-      await fetch("/api/capture/video/stop");
-      this.videoActive = false;
-      btn.textContent = "Start Video";
-      btn.style.background = "#38bdf8";
-    }
-    this.logLive(this.videoActive ? "Video recording started" : "Video recording stopped");
+    const action = this.videoActive ? "stop" : "start";
+    fetch(`/api/capture/video/${action}`)
+      .then(() => {
+        this.videoActive = !this.videoActive;
+        btn.textContent = this.videoActive ? "Stop Video" : "Start Video";
+        btn.style.background = this.videoActive ? "#ef4444" : "#38bdf8";
+        this.logLive(this.videoActive ? "Video recording started" : "Video recording stopped");
+      });
   },
 
-  async takeSample() {
+  takeSample() {
     this.logLive("Taking sample...");
-    const res = await fetch("/api/sample/take");
-    const data = await res.json();
-    this.logLive(`Sample data saved: ${data.sample.id}`);
-    if (this.currentView === "samples") this.loadSamples();
+    fetch("/api/sample/take")
+      .then(res => res.json())
+      .then(data => {
+        this.logLive(`Sample saved: ${data.sample.id}`);
+        if (this.currentView === "samples") this.loadSamples();
+      });
   },
 
   logLive(msg) {
@@ -122,29 +99,70 @@ const app = {
     }
   },
 
-  // Inicialización
-  init() {
-    this.showView('samples'); // vista inicial
+  loadConfig() {
+    fetch("/api/config")
+      .then(res => res.json())
+      .then(config => {
+        document.getElementById("stepper1-dir").value = config.stepper1.dir_pin;
+        document.getElementById("stepper1-step").value = config.stepper1.step_pin;
+        document.getElementById("stepper1-steps").value = config.stepper1.steps_take_sample;
+        document.getElementById("stepper2-dir").value = config.stepper2.dir_pin;
+        document.getElementById("stepper2-step").value = config.stepper2.step_pin;
+        document.getElementById("stepper2-steps").value = config.stepper2.steps_focus;
+      })
+      .catch(err => console.error("Load config error:", err));
+  },
 
-    // Menú táctil
+  saveConfig() {
+    const config = {
+      stepper1: {
+        dir_pin: document.getElementById("stepper1-dir").value,
+        step_pin: document.getElementById("stepper1-step").value,
+        steps_take_sample: document.getElementById("stepper1-steps").value
+      },
+      stepper2: {
+        dir_pin: document.getElementById("stepper2-dir").value,
+        step_pin: document.getElementById("stepper2-step").value,
+        steps_focus: document.getElementById("stepper2-steps").value
+      }
+    };
+    fetch("/api/config", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(config)
+    })
+    .then(res => {
+      if (res.ok) {
+        document.getElementById("config-status").textContent = "Configuration saved!";
+        document.getElementById("config-status").style.color = "green";
+        setTimeout(() => document.getElementById("config-status").textContent = "", 3000);
+      } else {
+        throw new Error("Save failed");
+      }
+    })
+    .catch(err => {
+      document.getElementById("config-status").textContent = "Error: " + err.message;
+      document.getElementById("config-status").style.color = "red";
+    });
+  },
+
+  init() {
+    this.showView('samples');
     const menuToggle = document.getElementById("menu-toggle");
     const overlay = document.getElementById("overlay");
     const sidebar = document.getElementById("sidebar");
-
     if (menuToggle) {
       menuToggle.addEventListener("click", () => {
         sidebar.classList.add("active");
         overlay.classList.add("active");
       });
     }
-
     if (overlay) {
       overlay.addEventListener("click", () => {
         sidebar.classList.remove("active");
         overlay.classList.remove("active");
       });
     }
-
     document.addEventListener("click", (e) => {
       if (window.innerWidth <= 768) {
         const outside = !sidebar.contains(e.target) && menuToggle && !menuToggle.contains(e.target);
@@ -157,5 +175,4 @@ const app = {
   }
 };
 
-// Iniciar cuando el DOM esté listo
 document.addEventListener("DOMContentLoaded", () => app.init());

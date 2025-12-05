@@ -31,10 +31,20 @@
           <tr><th>ID</th><th>Timestamp</th><th>Type</th><th>Actions</th></tr>
         </thead>
         <tbody id="samplesBody">
-          <tr><td colspan="4">Loading samples...</td></tr>
+          {% if initial_samples %}
+            {% for s in initial_samples %}
+            <tr>
+              <td>{{ s.id }}</td>
+              <td>{{ s.time }}</td>
+              <td>{{ s.type }}</td>
+              <td><a href="/download/{{ s.id }}" class="btn">Download</a></td>
+            </tr>
+            {% endfor %}
+          {% else %}
+            <tr><td colspan="4">No samples</td></tr>
+          {% endif %}
         </tbody>
       </table>
-      <!-- ❌ Consola eliminada de esta vista -->
     </div>
 
     <!-- Live View -->
@@ -58,10 +68,26 @@
       <div id="live-console" class="console">Awaiting commands...</div>
     </div>
 
-    <!-- Settings (placeholder) -->
+    <!-- Settings View -->
     <div id="view-settings" class="view">
-      <h1>Settings</h1>
-      <p>System and camera configuration.</p>
+      <h1>Stepper Configuration</h1>
+      
+      <h2>Stepper 1 (Take Sample)</h2>
+      <div class="config-group">
+        <label>DIR Pin: <input type="number" id="stepper1-dir" value="26"></label>
+        <label>STEP Pin: <input type="number" id="stepper1-step" value="19"></label>
+        <label>Steps per Sample: <input type="number" id="stepper1-steps" value="2000"></label>
+      </div>
+
+      <h2>Stepper 2 (Focus)</h2>
+      <div class="config-group">
+        <label>DIR Pin: <input type="number" id="stepper2-dir" value="5"></label>
+        <label>STEP Pin: <input type="number" id="stepper2-step" value="6"></label>
+        <label>Steps per Focus: <input type="number" id="stepper2-steps" value="100"></label>
+      </div>
+
+      <button class="btn" onclick="app.saveConfig()">Save Configuration</button>
+      <div id="config-status" style="margin-top: 10px; color: green;"></div>
     </div>
   </main>
 </div>

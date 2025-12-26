@@ -132,6 +132,13 @@ tr:hover { background: #f1f5f9; }
 .take-sample:hover {
   background: #059669 !important;
 }
+.btn-danger {
+  background: #ef4444 !important;
+  border-color: #ef4444 !important;
+}
+.btn-danger:hover {
+  background: #dc2626 !important;
+}
 
 .video-feed {
   width: 100%;
@@ -172,6 +179,19 @@ tr:hover { background: #f1f5f9; }
   width: 80px;
   padding: 5px;
   margin-left: 10px;
+}
+
+/* Estilos para la casilla de ignorar límites */
+.focus-controls label {
+  font-size: 14px;
+  color: #334155;
+  cursor: pointer;
+}
+
+.focus-controls input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
 }
 
 @media (max-width: 768px) {

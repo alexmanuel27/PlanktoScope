@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>PlanktoScope</title>
+  <title>Modular PlanktoScope</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -13,7 +13,7 @@
 
 <div class="container">
   <nav id="sidebar">
-    <h2>PlanktoScope</h2>
+    <h2>Modular PlanktoScope</h2>
     <a href="#" onclick="app.showView('samples')">Samples</a>
     <a href="#" onclick="app.showView('live')">Live View</a>
     <a href="#" onclick="app.showView('settings')">Settings</a>
@@ -25,6 +25,7 @@
       <h1>Sample Library</h1>
       <div class="btn-group">
         <a href="/download/all" class="btn">Download All</a>
+        <button class="btn btn-danger" onclick="app.deleteAllSamples()">Delete All</button>
       </div>
       <table>
         <thead>
@@ -37,7 +38,10 @@
               <td>{{ s.id }}</td>
               <td>{{ s.time }}</td>
               <td>{{ s.type }}</td>
-              <td><a href="/download/{{ s.id }}" class="btn">Download</a></td>
+              <td>
+                <a href="/download/{{ s.id }}" class="btn">Download</a>
+                <button class="btn btn-danger" onclick="app.deleteSample('{{ s.id }}')">Delete</button>
+              </td>
             </tr>
             {% endfor %}
           {% else %}
@@ -54,15 +58,20 @@
         <img src="/video_feed" alt="Live Stream" class="video-feed">
         <div class="focus-controls">
           <button class="btn" onclick="app.focusMotor('out')">–</button>
-          <span id="focus-value">50</span>
+          <span id="focus-value">100</span>
           <button class="btn" onclick="app.focusMotor('in')">+</button>
           <span>Focus Step</span>
+          <label style="margin-left: 15px; display: inline-flex; align-items: center; gap: 5px;">
+            <input type="checkbox" id="ignore-focus-limits">
+            Ignore Limits
+          </label>
         </div>
       </div>
       <div class="btn-group live-buttons">
         <button class="btn" onclick="app.capturePhoto()">Capture Photo</button>
         <button class="btn" id="videoBtn" onclick="app.toggleVideo()">Start Video</button>
         <button class="btn take-sample" onclick="app.takeSample()">Take Sample</button>
+        <button class="btn" id="ledBtn" onclick="app.toggleLed()">LED OFF</button>
       </div>
       <h2>Live Console</h2>
       <div id="live-console" class="console">Awaiting commands...</div>
@@ -76,6 +85,7 @@
       <div class="config-group">
         <label>DIR Pin: <input type="number" id="stepper1-dir" value="26"></label>
         <label>STEP Pin: <input type="number" id="stepper1-step" value="19"></label>
+        <label>ENABLE Pin: <input type="number" id="stepper1-enable" value="9"></label>
         <label>Steps per Sample: <input type="number" id="stepper1-steps" value="2000"></label>
       </div>
 
@@ -83,7 +93,10 @@
       <div class="config-group">
         <label>DIR Pin: <input type="number" id="stepper2-dir" value="5"></label>
         <label>STEP Pin: <input type="number" id="stepper2-step" value="6"></label>
+        <label>ENABLE Pin: <input type="number" id="stepper2-enable" value="13"></label>
         <label>Steps per Focus: <input type="number" id="stepper2-steps" value="100"></label>
+        <label>Focus Min: <input type="number" id="stepper2-focus-min" value="40"></label>
+        <label>Focus Max: <input type="number" id="stepper2-focus-max" value="60"></label>
       </div>
 
       <button class="btn" onclick="app.saveConfig()">Save Configuration</button>

@@ -13,13 +13,12 @@ import cv2
 import numpy as np
 import math
 
-# ========== Mode simulation ==========
+# ========== With or Without the Raspberry Pi ==========
 SIMULATION_MODE = os.getenv("SIMULATION_MODE", "False").lower() == "true"
 
 if SIMULATION_MODE:
-    print("⚠️  Running in SIMULATION MODE (no Raspberry Pi required)")
+    print("Running in SIMULATION MODE (no Raspberry Pi required)")
     
-    # Simuler RPi.GPIO
     class MockGPIO:
         BCM = "BCM"
         OUT = "OUT"
@@ -45,7 +44,6 @@ if SIMULATION_MODE:
     
     GPIO = MockGPIO()
     
-    # Simuler picamera2
     class MockPicamera2:
         def __init__(self):
             self.recording = False
@@ -60,7 +58,6 @@ if SIMULATION_MODE:
             pass
         
         def capture_buffer(self, stream):
-            # Générer une image de test (noir avec du bruit)
             frame = np.random.randint(0, 255, (480 * 3 // 2, 640), dtype=np.uint8)
             return frame.tobytes()
         
@@ -77,7 +74,6 @@ if SIMULATION_MODE:
     class MockFileOutput:
         def __init__(self, path):
             self.path = path
-            # Créer un fichier vide pour la simulation
             open(path, 'wb').close()
     
     Picamera2 = MockPicamera2
@@ -88,7 +84,7 @@ else:
     try:
         import RPi.GPIO as GPIO
     except ImportError:
-        print("❌ RPi.GPIO not available. Set SIMULATION_MODE=true to run without Raspberry Pi")
+        print("RPi.GPIO not available. Set SIMULATION_MODE=true to run without Raspberry Pi")
         raise
     
     try:

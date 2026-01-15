@@ -11,16 +11,93 @@ from queue import Queue
 from threading import Lock
 import cv2
 import numpy as np
-import RPi.GPIO as GPIO
 import math
 
-try:
-    from picamera2 import Picamera2
-    from picamera2.encoders import H264Encoder
-    from picamera2.outputs import FileOutput
+# ========== Mode simulation ==========
+SIMULATION_MODE = os.getenv("SIMULATION_MODE", "False").lower() == "true"
+
+if SIMULATION_MODE:
+    print("⚠️  Running in SIMULATION MODE (no Raspberry Pi required)")
+    
+    # Simuler RPi.GPIO
+    class MockGPIO:
+        BCM = "BCM"
+        OUT = "OUT"
+        IN = "IN"
+        HIGH = 1
+        LOW = 0
+        
+        @staticmethod
+        def setmode(mode):
+            pass
+        
+        @staticmethod
+        def setup(pin, mode):
+            pass
+        
+        @staticmethod
+        def output(pin, value):
+            pass
+        
+        @staticmethod
+        def cleanup():
+            pass
+    
+    GPIO = MockGPIO()
+    
+    # Simuler picamera2
+    class MockPicamera2:
+        def __init__(self):
+            self.recording = False
+        
+        def create_preview_configuration(self, **kwargs):
+            return {}
+        
+        def configure(self, config):
+            pass
+        
+        def start(self):
+            pass
+        
+        def capture_buffer(self, stream):
+            # Générer une image de test (noir avec du bruit)
+            frame = np.random.randint(0, 255, (480 * 3 // 2, 640), dtype=np.uint8)
+            return frame.tobytes()
+        
+        def start_recording(self, encoder, output, name=None):
+            self.recording = True
+        
+        def stop_recording(self):
+            self.recording = False
+    
+    class MockH264Encoder:
+        def __init__(self, bitrate):
+            self.bitrate = bitrate
+    
+    class MockFileOutput:
+        def __init__(self, path):
+            self.path = path
+            # Créer un fichier vide pour la simulation
+            open(path, 'wb').close()
+    
+    Picamera2 = MockPicamera2
+    H264Encoder = MockH264Encoder
+    FileOutput = MockFileOutput
     CAMERA_AVAILABLE = True
-except ImportError:
-    CAMERA_AVAILABLE = False
+else:
+    try:
+        import RPi.GPIO as GPIO
+    except ImportError:
+        print("❌ RPi.GPIO not available. Set SIMULATION_MODE=true to run without Raspberry Pi")
+        raise
+    
+    try:
+        from picamera2 import Picamera2
+        from picamera2.encoders import H264Encoder
+        from picamera2.outputs import FileOutput
+        CAMERA_AVAILABLE = True
+    except ImportError:
+        CAMERA_AVAILABLE = False
 
 # ========== Clasificador de plancton ==========
 try:

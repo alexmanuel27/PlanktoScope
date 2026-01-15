@@ -26,7 +26,7 @@ fi
 # Install dependencies
 echo "Installing dependencies..."
 ./planktoscope-env/bin/pip install --upgrade pip
-./planktoscope-env/bin/pip install -r requirements.txt
+./planktoscope-env/bin/pip install -r ../requirements.txt
 
 # Install opencv-python and numpy for image processing
 echo "Installing image processing libraries..."

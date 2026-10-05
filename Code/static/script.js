@@ -81,12 +81,18 @@ const app = {
       .then(data => {
         if (data.status === "ok") {
           this.logLive(`Photo saved: ${data.file}`);
-          // ✅ Mostrar resumen en consola web
+          
+          // Mostrar resumen de clasificación
           if (data.summary) {
             this.logLive(`Classification summary: ${data.summary}`);
-          } else {
-            this.logLive("No classification summary received");
           }
+          
+          // ✅ Mostrar indicador de calidad del agua
+          if (data.water_quality) {
+            const wq = data.water_quality;
+            this.logLive(`Water quality: ${wq.category} (score: ${wq.score}) → Color: ${wq.color}`);
+          }
+          
           if (this.currentView === "samples") this.loadSamples();
         } else {
           this.logLive("Capture failed");

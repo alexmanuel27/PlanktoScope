@@ -1,0 +1,20 @@
+[Unit]
+Description=Modular PlanktoScope Web Interface
+After=multi-user.target
+Wants=multi-user.target
+
+[Service]
+Type=simple
+User=alex
+Group=alex
+WorkingDirectory=/home/alex/PlanktoScope/Code
+Environment=PYTHONUNBUFFERED=1
+# ✅ Usar el Python del entorno virtual
+ExecStart=/home/alex/PlanktoScope/Code/planktoscope-env/bin/python app.py
+Restart=always
+RestartSec=30
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

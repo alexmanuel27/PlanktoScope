@@ -1,0 +1,162 @@
+{
+  "Alexandrium": {
+    "group": "Dinoflagellate",
+    "trophic_preference": "meso-eutrophic",
+    "pollution_tolerance": 0.9,
+    "bloom_associated": true,
+    "risk_note": "Harmful algal bloom (PSP and other syndromes) linked to nutrient enrichment in coastal systems",
+    "color": "red"
+  },
+  "Asterionellopsis glacialis": {
+    "group": "Diatom",
+    "trophic_preference": "mesotrophic",
+    "pollution_tolerance": 0.5,
+    "bloom_associated": true,
+    "risk_note": "Coastal diatom frequent in productive, well‑flushed waters",
+    "color": "yellow"
+  },
+  "Cerataulina": {
+    "group": "Diatom",
+    "trophic_preference": "meso-eutrophic",
+    "pollution_tolerance": 0.5,
+    "bloom_associated": false,
+    "risk_note": "Marine diatom associated with nutrient‑rich upwelling or mixed coastal waters",
+    "color": "yellow"
+  },
+  "Ceratium": {
+    "group": "Dinoflagellate",
+    "trophic_preference": "meso-eutrophic",
+    "pollution_tolerance": 0.6,
+    "bloom_associated": true,
+    "risk_note": "Blooms in stratified coastal waters influenced by nutrient inputs",
+    "color": "orange"
+  },
+  "Chaetoceros": {
+    "group": "Diatom",
+    "trophic_preference": "eutrophic",
+    "pollution_tolerance": 0.8,
+    "bloom_associated": true,
+    "risk_note": "Dominant genus in high‑nutrient coastal and upwelling systems; spores record eutrophication events",
+    "color": "red"
+  },
+  "Entomoneis": {
+    "group": "Diatom",
+    "trophic_preference": "oligo-mesotrophic",
+    "pollution_tolerance": 0.3,
+    "bloom_associated": false,
+    "risk_note": "Benthic/periphytic genus typical of moderately enriched but not heavily polluted habitats",
+    "color": "green"
+  },
+  "Guinardia": {
+    "group": "Diatom",
+    "trophic_preference": "mesotrophic",
+    "pollution_tolerance": 0.5,
+    "bloom_associated": true,
+    "risk_note": "Common in productive coastal waters with elevated chlorophyll a",
+    "color": "yellow"
+  },
+  "Hemiaulus": {
+    "group": "Diatom",
+    "trophic_preference": "oligo-mesotrophic",
+    "pollution_tolerance": 0.2,
+    "bloom_associated": false,
+    "risk_note": "Oceanic diatom, often with N2‑fixing symbionts, typical of relatively low‑nutrient waters",
+    "color": "green"
+  },
+  "Lauderia annulata": {
+    "group": "Diatom",
+    "trophic_preference": "mesotrophic",
+    "pollution_tolerance": 0.4,
+    "bloom_associated": false,
+    "risk_note": "Coastal diatom of well‑mixed, nutrient‑rich but not extremely polluted waters",
+    "color": "yellow"
+  },
+  "Nitzschia": {
+    "group": "Diatom",
+    "trophic_preference": "eutrophic",
+    "pollution_tolerance": 0.9,
+    "bloom_associated": true,
+    "risk_note": "Many species tolerant to organic pollution, variable salinity and eutrophication; widely used as pollution indicators",
+    "color": "red"
+  },
+  "Noctiluca": {
+    "group": "Dinoflagellate",
+    "trophic_preference": "eutrophic",
+    "pollution_tolerance": 1.0,
+    "bloom_associated": true,
+    "risk_note": "Visible red/green tides associated with organic enrichment and dense phytoplankton in coastal systems",
+    "color": "red"
+  },
+  "Ornithocercus magnificus": {
+    "group": "Dinoflagellate",
+    "trophic_preference": "oligotrophic",
+    "pollution_tolerance": 0.2,
+    "bloom_associated": false,
+    "risk_note": "Warm‑water oceanic taxon typical of relatively unpolluted offshore waters",
+    "color": "green"
+  },
+  "Pinnularia": {
+    "group": "Diatom",
+    "trophic_preference": "oligotrophic",
+    "pollution_tolerance": 0.2,
+    "bloom_associated": false,
+    "risk_note": "Freshwater benthic genus with many species used as indicators of good ecological status",
+    "color": "green"
+  },
+  "Pleurosigma": {
+    "group": "Diatom",
+    "trophic_preference": "mesotrophic",
+    "pollution_tolerance": 0.4,
+    "bloom_associated": false,
+    "risk_note": "Benthic diatom of productive coastal sediments, often linked to moderate organic enrichment",
+    "color": "yellow"
+  },
+  "Prorocentrum": {
+    "group": "Dinoflagellate",
+    "trophic_preference": "eutrophic",
+    "pollution_tolerance": 0.9,
+    "bloom_associated": true,
+    "risk_note": "Several toxic HAB species (e.g. P. minimum) linked to anthropogenic nutrient enrichment",
+    "color": "red"
+  },
+  "Protoperidinium": {
+    "group": "Dinoflagellate",
+    "trophic_preference": "mesotrophic",
+    "pollution_tolerance": 0.5,
+    "bloom_associated": false,
+    "risk_note": "Heterotrophic dinoflagellate that increases with high phytoplankton biomass in enriched systems",
+    "color": "yellow"
+  },
+  "Pyrodinium": {
+    "group": "Dinoflagellate",
+    "trophic_preference": "eutrophic",
+    "pollution_tolerance": 1.0,
+    "bloom_associated": true,
+    "risk_note": "Highly toxic HAB genus in tropical coastal waters subject to strong nutrient inputs",
+    "color": "red"
+  },
+  "Thalassionema": {
+    "group": "Diatom",
+    "trophic_preference": "meso-eutrophic",
+    "pollution_tolerance": 0.6,
+    "bloom_associated": true,
+    "risk_note": "Marine diatom common in productive coastal waters with good oxygenation",
+    "color": "orange"
+  },
+  "Thalassiosira": {
+    "group": "Diatom",
+    "trophic_preference": "eutrophic",
+    "pollution_tolerance": 0.7,
+    "bloom_associated": true,
+    "risk_note": "Key coastal and upwelling genus dominating in high‑nutrient waters; used as indicator of eutrophication",
+    "color": "red"
+  },
+  "_meta": {
+    "note": "Trophic categories are qualitative (oligotrophic, mesotrophic, eutrophic) and pollution_tolerance (0–1) is a heuristic index derived from published information on diatom and dinoflagellate indicator values, eutrophication responses and HAB occurrence, not from a single standardized index.",
+    "references_example": [
+      "van Dam et al. ecological indicator values for diatoms and subsequent revisions",
+      "Reviews on diatom indices and pollution sensitivity in lotic systems",
+      "Reviews on harmful algal blooms and eutrophication linkages for Alexandrium, Prorocentrum, Pyrodinium, Noctiluca and related genera"
+    ]
+  }
+}

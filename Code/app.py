@@ -31,6 +31,19 @@ except Exception as e:
     CLASSIFIER_AVAILABLE = False
     print(f"❌ Classifier error: {e}")
 
+# ========== Cargar información de especies ==========
+SPECIES_INFO_PATH = os.path.join(os.path.dirname(__file__), "ml", "species_info.json")
+SPECIES_INFO = {}
+if os.path.exists(SPECIES_INFO_PATH):
+    try:
+        with open(SPECIES_INFO_PATH, "r") as f:
+            SPECIES_INFO = json.load(f)
+        print("✅ Species info loaded")
+    except Exception as e:
+        print(f"❌ Species info error: {e}")
+else:
+    print(f"❌ Species info file not found at {SPECIES_INFO_PATH}")
+
 app = Flask(__name__)
 SAMPLES_DIR = os.path.join(os.path.dirname(__file__), "samples")
 CONFIG_FILE = os.path.join(os.path.dirname(__file__), "config.json")
@@ -53,7 +66,7 @@ def annotate_frame(frame, classifications):
         x, y, w, h = obj["x"], obj["y"], obj["w"], obj["h"]
         label = obj["label"]
         confidence = obj["confidence"]
-        color = (0, 255, 0) if label != "unknown" else (0, 0, 255)
+        color = (0, 0, 0)  # ✅ Siempre negro
         cv2.rectangle(frame, (x, y), (x+w, y+h), color, 2)
         label_text = f"{label} ({int(confidence)}%)" if confidence > 0 else "unknown"
         font = cv2.FONT_HERSHEY_SIMPLEX
@@ -63,6 +76,117 @@ def annotate_frame(frame, classifications):
         text_y = y - 10 if y - 10 > 10 else y + h + 20
         cv2.putText(frame, label_text, (text_x, text_y), font, font_scale, color, thickness)
     return frame
+
+# ========== Función para añadir la barra de calidad del agua a la imagen ==========
+# ========== Función para añadir la barra de calidad del agua a la imagen ==========
+# ========== Función para añadir la barra de calidad del agua a la imagen ==========
+# ========== Función para añadir la barra de calidad del agua a la imagen ==========
+# ========== Función para añadir la barra de calidad del agua a la imagen ==========
+def add_water_quality_bar(frame, water_quality):
+    """Añade una barra vertical degradada (rojo arriba → verde abajo) y texto cualitativo debajo de la barra."""
+    H, W = frame.shape[:2]
+    
+    # Tamaño de la barra
+    bar_width = 30
+    bar_height = H
+    bar_x = W - bar_width
+    
+    # Crear barra degradada (rojo arriba → verde abajo)
+    bar = np.zeros((bar_height, bar_width, 3), dtype=np.uint8)
+    for i in range(bar_height):
+        ratio = i / bar_height  # 0=abajo, 1=arriba
+        # Interpolar entre rojo (arriba) y verde (abajo)
+        r = int(255 * (1 - ratio))  # rojo disminuye de 255 a 0
+        g = int(255 * ratio)        # verde aumenta de 0 a 255
+        b = 0                       # azul siempre 0
+        bar[i, :, :] = [b, g, r]  # BGR
+    
+    # Dibujar barra en la imagen (sin borde)
+    frame[:, bar_x:] = bar
+    
+    # Calcular posición del indicador según el score
+    if water_quality:
+        score = water_quality.get("score", 0.0)
+        category = water_quality.get("category", "unknown")
+        color = water_quality.get("color", "gray")
+        
+        # Posición vertical del indicador (0=abajo, 1=arriba)
+        # ✅ Invertido: 1-score para que 0.7 vaya arriba
+        y_pos = int((1 - score) * (bar_height - 1))
+        
+        # Dibujar un pequeño rectángulo blanco en la posición
+        cv2.rectangle(frame, (bar_x, y_pos - 2), (bar_x + bar_width - 1, y_pos + 2), (255, 255, 255), 2)
+        
+        # Añadir texto cualitativo DEBAJO de la barra
+        text = f"{category} (score: {score:.2f})"
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        font_scale = 0.5
+        thickness = 1
+        text_size = cv2.getTextSize(text, font, font_scale, thickness)[0]
+        
+        # Posición: debajo de la barra, centrado horizontalmente
+        text_x = bar_x + (bar_width - text_size[0]) // 2
+        text_y = bar_height + text_size[1] + 5  # 5 píxeles de margen
+        
+        # Dibujar fondo oscuro para el texto
+        cv2.rectangle(frame, (text_x - 5, text_y - text_size[1] - 5), (text_x + text_size[0] + 5, text_y + 5), (0, 0, 0), -1)
+        
+        # Dibujar texto
+        cv2.putText(frame, text, (text_x, text_y), font, font_scale, (255, 255, 255), thickness)
+    
+    return frame
+
+
+
+
+# ========== Función para calcular calidad del agua ==========
+def calculate_water_quality(classifications):
+    """Calcula un indicador de calidad del agua basado en las clasificaciones."""
+    if not classifications:
+        return {"score": 0.0, "category": "unknown", "color": "gray"}
+    
+    # Contar ocurrencias por especie
+    counts = {}
+    for obj in classifications:
+        label = obj["label"]
+        if label != "unknown":
+            counts[label] = counts.get(label, 0) + 1
+    
+    if not counts:
+        return {"score": 0.0, "category": "unknown", "color": "gray"}
+    
+    # Calcular score ponderado
+    total_count = sum(counts.values())
+    weighted_score = 0.0
+    dominant_species = max(counts.items(), key=lambda x: x[1])[0]
+    
+    for species, count in counts.items():
+        tolerance = SPECIES_INFO.get(species, {}).get("pollution_tolerance", 0.5)
+        weighted_score += count * tolerance
+    
+    avg_score = weighted_score / total_count
+    
+    # Determinar categoría
+    if avg_score <= 0.3:
+        category = "oligotrophic"
+        color = "green"
+    elif avg_score <= 0.6:
+        category = "mesotrophic"
+        color = "yellow"
+    else:
+        category = "eutrophic"
+        color = "red"
+    
+    # Usar el color de la especie dominante si está definido
+    dominant_color = SPECIES_INFO.get(dominant_species, {}).get("color", color)
+    
+    return {
+        "score": round(avg_score, 2),
+        "category": category,
+        "color": dominant_color,
+        "dominant": dominant_species,
+        "counts": counts
+    }
 
 # ========== Cargar configuración ==========
 def load_config():
@@ -284,7 +408,6 @@ if CAMERA_AVAILABLE:
             yuv_reshaped = yuv_array.reshape((480 * 3 // 2, 640))
             bgr_frame = cv2.cvtColor(yuv_reshaped, cv2.COLOR_YUV2BGR_I420)
             
-            # Guardar imagen original
             cv2.imwrite(img_path, bgr_frame)
             log_to_console(f"Image captured: {img_filename}")
             
@@ -347,6 +470,10 @@ if CAMERA_AVAILABLE:
                 })
                 os.remove(obj_path)
             
+            # ✅ Calcular calidad del agua
+            water_quality = calculate_water_quality(classifications)
+            log_to_console(f"Water quality: {water_quality['category']} (score: {water_quality['score']}) → Color: {water_quality['color']}")
+            
             # Generar resumen
             class_count = {}
             for obj in classifications:
@@ -360,28 +487,32 @@ if CAMERA_AVAILABLE:
                 class_list = "No objects classified"
                 log_to_console(class_list)
             
-            # Dibujar anotaciones
+            # Dibujar anotaciones (siempre en negro)
             annotated_frame = bgr_frame.copy()
             for obj in classifications:
                 x, y, w, h = obj["x"], obj["y"], obj["w"], obj["h"]
                 label = obj["label"]
                 confidence = obj["confidence"]
-                color = (0, 255, 0) if label != "unknown" else (0, 0, 255)
+                color = (0, 0, 0)  # Negro
                 cv2.rectangle(annotated_frame, (x, y), (x+w, y+h), color, 2)
                 label_text = f"{label} ({int(confidence)}%)" if confidence > 0 else "unknown"
                 cv2.putText(annotated_frame, label_text, (x+5, y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
             
-            # Actualizar la última imagen anotada
-            last_annotated_frame = annotated_frame
+            # ✅ Añadir barra de calidad del agua (con texto debajo)
+            annotated_frame_with_bar = add_water_quality_bar(annotated_frame, water_quality)
+            
+            last_annotated_frame = annotated_frame_with_bar
             last_annotation_time = time.time()
             
-            # ✅ Guardar la imagen ANOTADA con el nombre clasificado
+            # ✅ Guardar imagen con nombre que incluye categoría y score
             if classifications:
                 first_class = classifications[0]["label"]
                 first_conf = int(classifications[0]["confidence"])
-                annotated_filename = f"plankton_{first_class}_{first_conf}_{counter['photo']}_annotated.jpg"
+                category = water_quality.get("category", "unknown")
+                score = water_quality.get("score", 0.0)
+                annotated_filename = f"plankton_{first_class}_{score:.2f}_{category}.jpg"
                 annotated_path = os.path.join(SAMPLES_DIR, annotated_filename)
-                cv2.imwrite(annotated_path, annotated_frame)
+                cv2.imwrite(annotated_path, annotated_frame_with_bar)
                 log_to_console(f"Annotated image saved: {annotated_filename}")
                 final_filename = annotated_filename
             else:
@@ -393,7 +524,8 @@ if CAMERA_AVAILABLE:
                 "class": "multiple",
                 "confidence": 0.0,
                 "objects": classifications,
-                "summary": class_list
+                "summary": class_list,
+                "water_quality": water_quality
             })
             
         except Exception as e:

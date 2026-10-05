@@ -142,7 +142,7 @@ tr:hover { background: #f1f5f9; }
 
 .video-feed {
   width: 100%;
-  max-width: 800px;
+  max-width: 640px;
   border: 1px solid #ddd;
   border-radius: 8px;
 }

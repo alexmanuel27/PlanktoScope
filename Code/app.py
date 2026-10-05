@@ -273,21 +273,25 @@ def handle_config():
             save_config(new_config)
             config = new_config
             
-            GPIO.cleanup()
-            GPIO.setmode(GPIO.BCM)
+            _motor_lock.acquire()  # esperar a que termine cualquier movimiento
+            try:
+                GPIO.cleanup()
+                GPIO.setmode(GPIO.BCM)
             
-            GPIO.setup(config["stepper1"]["dir_pin"], GPIO.OUT)
-            GPIO.setup(config["stepper1"]["step_pin"], GPIO.OUT)
-            GPIO.setup(config["stepper1"]["enable_pin"], GPIO.OUT)
-            GPIO.output(config["stepper1"]["enable_pin"], GPIO.HIGH)
+                GPIO.setup(config["stepper1"]["dir_pin"], GPIO.OUT)
+                GPIO.setup(config["stepper1"]["step_pin"], GPIO.OUT)
+                GPIO.setup(config["stepper1"]["enable_pin"], GPIO.OUT)
+                GPIO.output(config["stepper1"]["enable_pin"], GPIO.HIGH)
             
-            GPIO.setup(config["stepper2"]["dir_pin"], GPIO.OUT)
-            GPIO.setup(config["stepper2"]["step_pin"], GPIO.OUT)
-            GPIO.setup(config["stepper2"]["enable_pin"], GPIO.OUT)
-            GPIO.output(config["stepper2"]["enable_pin"], GPIO.HIGH)
+                GPIO.setup(config["stepper2"]["dir_pin"], GPIO.OUT)
+                GPIO.setup(config["stepper2"]["step_pin"], GPIO.OUT)
+                GPIO.setup(config["stepper2"]["enable_pin"], GPIO.OUT)
+                GPIO.output(config["stepper2"]["enable_pin"], GPIO.HIGH)
             
-            GPIO.setup(LED_PIN, GPIO.OUT)
-            GPIO.output(LED_PIN, GPIO.HIGH if not led_state else GPIO.LOW)
+                GPIO.setup(LED_PIN, GPIO.OUT)
+                GPIO.output(LED_PIN, GPIO.HIGH if not led_state else GPIO.LOW)
+            finally:
+                _motor_lock.release()
             
             log_to_console("Configuration updated")
             return jsonify(status="ok")
@@ -316,23 +320,29 @@ def toggle_led():
     log_to_console(f"LED turned {status}")
     return jsonify(state=led_state, status=status)
 
+_motor_lock = Lock()  # un motor cada vez: no se cruzan pulsos ni se suman picos de corriente
+
+def rampa(steps, t_min, t_start, ramp):
+    """Semiperiodo de cada paso: arranca a t_start, crucero a t_min y frena simétrico."""
+    ramp = min(ramp, steps // 2)
+    for i in range(steps):
+        k = min(i, steps - 1 - i, ramp)
+        yield t_min if ramp == 0 else t_start - (t_start - t_min) * k / ramp
+
 def move_stepper(stepper_key, direction, steps):
-    pin_dir = config[stepper_key]["dir_pin"]
-    pin_step = config[stepper_key]["step_pin"]
-    pin_enable = config[stepper_key]["enable_pin"]
-    delay = config[stepper_key]["delay"]
-    
-    GPIO.output(pin_enable, GPIO.LOW)
-    time.sleep(0.01)
-    GPIO.output(pin_dir, GPIO.HIGH if direction == "forward" else GPIO.LOW)
-    
-    for _ in range(steps):
-        GPIO.output(pin_step, GPIO.HIGH)
-        time.sleep(delay)
-        GPIO.output(pin_step, GPIO.LOW)
-        time.sleep(delay)
-    
-    GPIO.output(pin_enable, GPIO.HIGH)
+    c = config[stepper_key]
+    with _motor_lock:
+        GPIO.output(c["dir_pin"], GPIO.HIGH if direction == "forward" else GPIO.LOW)
+        GPIO.output(c["enable_pin"], GPIO.LOW)
+        time.sleep(0.01)
+        try:
+            for d in rampa(steps, c["delay"], c.get("delay_start", 0.002), c.get("ramp_steps", 200)):
+                GPIO.output(c["step_pin"], GPIO.HIGH)
+                time.sleep(d)
+                GPIO.output(c["step_pin"], GPIO.LOW)
+                time.sleep(d)
+        finally:
+            GPIO.output(c["enable_pin"], GPIO.HIGH)  # desactivar siempre, aunque falle a mitad
 
 @app.route("/api/focus/<direction>")
 def focus(direction):
@@ -510,10 +520,12 @@ if CAMERA_AVAILABLE:
                 first_conf = int(classifications[0]["confidence"])
                 category = water_quality.get("category", "unknown")
                 score = water_quality.get("score", 0.0)
-                annotated_filename = f"plankton_{first_class}_{score:.2f}_{category}.jpg"
+                stem = f"plankton_{first_class}_{score:.2f}_{category}_{counter['photo']}"  # el número evita sobrescribir
+                annotated_filename = f"{stem}.jpg"
                 annotated_path = os.path.join(SAMPLES_DIR, annotated_filename)
                 cv2.imwrite(annotated_path, annotated_frame_with_bar)
-                log_to_console(f"Annotated image saved: {annotated_filename}")
+                os.replace(img_path, os.path.join(SAMPLES_DIR, f"{stem}_raw.jpg"))  # la cruda pasa a llamarse como la clasificada
+                log_to_console(f"Annotated image saved: {annotated_filename} (+ {stem}_raw.jpg)")
                 final_filename = annotated_filename
             else:
                 final_filename = img_filename

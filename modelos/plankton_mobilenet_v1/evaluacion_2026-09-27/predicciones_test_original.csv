@@ -1,0 +1,119 @@
+imagen,real,predicho,confianza
+"test/Alexandrium/1_0.png",Alexandrium,Alexandrium,1.0000
+"test/Alexandrium/1_1.png",Alexandrium,Alexandrium,0.9995
+"test/Asterionellopsis glacialis/2_0.png",Asterionellopsis glacialis,Asterionellopsis glacialis,0.9997
+"test/Asterionellopsis glacialis/2_1.png",Asterionellopsis glacialis,Asterionellopsis glacialis,0.9999
+"test/Asterionellopsis glacialis/2_10.png",Asterionellopsis glacialis,Asterionellopsis glacialis,0.9999
+"test/Asterionellopsis glacialis/2_11.png",Asterionellopsis glacialis,Asterionellopsis glacialis,1.0000
+"test/Asterionellopsis glacialis/2_12.png",Asterionellopsis glacialis,Asterionellopsis glacialis,0.9999
+"test/Asterionellopsis glacialis/2_13.png",Asterionellopsis glacialis,Asterionellopsis glacialis,0.9981
+"test/Asterionellopsis glacialis/2_14.png",Asterionellopsis glacialis,Asterionellopsis glacialis,1.0000
+"test/Asterionellopsis glacialis/2_15.png",Asterionellopsis glacialis,Asterionellopsis glacialis,0.9953
+"test/Asterionellopsis glacialis/2_16.png",Asterionellopsis glacialis,Asterionellopsis glacialis,0.9999
+"test/Asterionellopsis glacialis/2_17.png",Asterionellopsis glacialis,Asterionellopsis glacialis,0.9981
+"test/Asterionellopsis glacialis/2_18.png",Asterionellopsis glacialis,Asterionellopsis glacialis,0.9999
+"test/Asterionellopsis glacialis/2_2.png",Asterionellopsis glacialis,Asterionellopsis glacialis,0.9973
+"test/Asterionellopsis glacialis/2_3.png",Asterionellopsis glacialis,Asterionellopsis glacialis,0.9998
+"test/Asterionellopsis glacialis/2_4.png",Asterionellopsis glacialis,Asterionellopsis glacialis,1.0000
+"test/Asterionellopsis glacialis/2_5.png",Asterionellopsis glacialis,Asterionellopsis glacialis,1.0000
+"test/Asterionellopsis glacialis/2_6.png",Asterionellopsis glacialis,Asterionellopsis glacialis,0.9213
+"test/Asterionellopsis glacialis/2_7.png",Asterionellopsis glacialis,Asterionellopsis glacialis,0.9999
+"test/Asterionellopsis glacialis/2_8.png",Asterionellopsis glacialis,Asterionellopsis glacialis,1.0000
+"test/Asterionellopsis glacialis/2_9.png",Asterionellopsis glacialis,Asterionellopsis glacialis,1.0000
+"test/Cerataulina/3_0.png",Cerataulina,Cerataulina,0.9998
+"test/Cerataulina/3_1.png",Cerataulina,Cerataulina,1.0000
+"test/Cerataulina/3_10.png",Cerataulina,Cerataulina,1.0000
+"test/Cerataulina/3_11.png",Cerataulina,Cerataulina,0.9730
+"test/Cerataulina/3_12.png",Cerataulina,Cerataulina,0.9999
+"test/Cerataulina/3_13.png",Cerataulina,Cerataulina,0.9999
+"test/Cerataulina/3_14.png",Cerataulina,Cerataulina,1.0000
+"test/Cerataulina/3_2.png",Cerataulina,Cerataulina,0.9997
+"test/Cerataulina/3_3.png",Cerataulina,Cerataulina,0.9968
+"test/Cerataulina/3_4.png",Cerataulina,Cerataulina,1.0000
+"test/Cerataulina/3_5.png",Cerataulina,Cerataulina,1.0000
+"test/Cerataulina/3_6.png",Cerataulina,Cerataulina,0.9999
+"test/Cerataulina/3_7.png",Cerataulina,Cerataulina,1.0000
+"test/Cerataulina/3_8.png",Cerataulina,Cerataulina,1.0000
+"test/Cerataulina/3_9.png",Cerataulina,Cerataulina,0.6790
+"test/Ceratium/4_0.png",Ceratium,Ceratium,1.0000
+"test/Ceratium/4_1.png",Ceratium,Ceratium,0.9985
+"test/Ceratium/4_10.png",Ceratium,Ceratium,1.0000
+"test/Ceratium/4_11.png",Ceratium,Ceratium,1.0000
+"test/Ceratium/4_2.png",Ceratium,Ceratium,1.0000
+"test/Ceratium/4_3.png",Ceratium,Ceratium,1.0000
+"test/Ceratium/4_4.png",Ceratium,Ceratium,1.0000
+"test/Ceratium/4_5.png",Ceratium,Ceratium,1.0000
+"test/Ceratium/4_6.png",Ceratium,Ceratium,1.0000
+"test/Ceratium/4_7.png",Ceratium,Ceratium,1.0000
+"test/Ceratium/4_8.png",Ceratium,Ceratium,1.0000
+"test/Ceratium/4_9.png",Ceratium,Ceratium,1.0000
+"test/Chaetoceros/5_0.png",Chaetoceros,Chaetoceros,0.9823
+"test/Chaetoceros/5_1.png",Chaetoceros,Chaetoceros,0.9772
+"test/Chaetoceros/5_2.png",Chaetoceros,Chaetoceros,0.9988
+"test/Chaetoceros/5_3.png",Chaetoceros,Chaetoceros,0.8384
+"test/Chaetoceros/5_4.png",Chaetoceros,Chaetoceros,0.9886
+"test/Chaetoceros/5_5.png",Chaetoceros,Chaetoceros,0.3706
+"test/Chaetoceros/5_6.png",Chaetoceros,Chaetoceros,0.9772
+"test/Entomoneis/6_0.png",Entomoneis,Entomoneis,1.0000
+"test/Entomoneis/6_1.png",Entomoneis,Entomoneis,0.7900
+"test/Entomoneis/6_2.png",Entomoneis,Entomoneis,0.9999
+"test/Entomoneis/6_3.png",Entomoneis,Entomoneis,0.9980
+"test/Entomoneis/6_4.png",Entomoneis,Entomoneis,1.0000
+"test/Guinardia/7_0.png",Guinardia,Guinardia,0.9998
+"test/Guinardia/7_1.png",Guinardia,Guinardia,0.9993
+"test/Guinardia/7_10.png",Guinardia,Guinardia,1.0000
+"test/Guinardia/7_11.png",Guinardia,Guinardia,0.7628
+"test/Guinardia/7_12.png",Guinardia,Guinardia,0.9989
+"test/Guinardia/7_13.png",Guinardia,Guinardia,0.9999
+"test/Guinardia/7_2.png",Guinardia,Guinardia,1.0000
+"test/Guinardia/7_3.png",Guinardia,Guinardia,0.9999
+"test/Guinardia/7_4.png",Guinardia,Guinardia,0.9975
+"test/Guinardia/7_5.png",Guinardia,Guinardia,1.0000
+"test/Guinardia/7_6.png",Guinardia,Guinardia,0.9862
+"test/Guinardia/7_7.png",Guinardia,Guinardia,0.9963
+"test/Guinardia/7_8.png",Guinardia,Guinardia,1.0000
+"test/Guinardia/7_9.png",Guinardia,Guinardia,0.9982
+"test/Hemiaulus/8_0.png",Hemiaulus,Hemiaulus,0.9977
+"test/Hemiaulus/8_1.png",Hemiaulus,Hemiaulus,0.9784
+"test/Lauderia annulata/9_0.png",Lauderia annulata,Lauderia annulata,1.0000
+"test/Lauderia annulata/9_1.png",Lauderia annulata,Lauderia annulata,0.9995
+"test/Lauderia annulata/9_2.png",Lauderia annulata,Lauderia annulata,1.0000
+"test/Lauderia annulata/9_3.png",Lauderia annulata,Lauderia annulata,0.9834
+"test/Nitzschia/10_0.png",Nitzschia,Nitzschia,0.9680
+"test/Nitzschia/10_1.png",Nitzschia,Nitzschia,0.9999
+"test/Nitzschia/10_2.png",Nitzschia,Nitzschia,0.9933
+"test/Noctiluca/11_0.png",Noctiluca,Noctiluca,1.0000
+"test/Noctiluca/11_1.png",Noctiluca,Noctiluca,0.9999
+"test/Ornithocercus magnificus/12_0.png",Ornithocercus magnificus,Ornithocercus magnificus,0.9995
+"test/Ornithocercus magnificus/12_3.png",Ornithocercus magnificus,Ornithocercus magnificus,0.9995
+"test/Pinnularia/13_0.png",Pinnularia,Pinnularia,0.9999
+"test/Pinnularia/13_1.png",Pinnularia,Pinnularia,0.9999
+"test/Pleurosigma/14_0.png",Pleurosigma,Pleurosigma,0.9849
+"test/Pleurosigma/14_1.png",Pleurosigma,Pleurosigma,0.9984
+"test/Pleurosigma/14_2.png",Pleurosigma,Pleurosigma,0.9999
+"test/Pleurosigma/14_3.png",Pleurosigma,Pleurosigma,0.9935
+"test/Prorocentrum/15_0.png",Prorocentrum,Prorocentrum,0.9999
+"test/Prorocentrum/15_1.png",Prorocentrum,Prorocentrum,0.9931
+"test/Prorocentrum/15_10.png",Prorocentrum,Prorocentrum,0.9997
+"test/Prorocentrum/15_2.png",Prorocentrum,Prorocentrum,0.9974
+"test/Prorocentrum/15_3.png",Prorocentrum,Prorocentrum,0.9999
+"test/Prorocentrum/15_4.png",Prorocentrum,Prorocentrum,0.9999
+"test/Prorocentrum/15_5.png",Prorocentrum,Prorocentrum,0.9997
+"test/Prorocentrum/15_6.png",Prorocentrum,Prorocentrum,0.9872
+"test/Prorocentrum/15_7.png",Prorocentrum,Prorocentrum,1.0000
+"test/Prorocentrum/15_8.png",Prorocentrum,Prorocentrum,1.0000
+"test/Prorocentrum/15_9.png",Prorocentrum,Prorocentrum,0.9999
+"test/Protoperidinium/16_0.png",Protoperidinium,Protoperidinium,1.0000
+"test/Protoperidinium/16_1.png",Protoperidinium,Protoperidinium,1.0000
+"test/Protoperidinium/16_2.png",Protoperidinium,Protoperidinium,1.0000
+"test/Pyrodinium/17_0.png",Pyrodinium,Pyrodinium,0.9949
+"test/Thalassionema/18_0.png",Thalassionema,Thalassionema,0.9975
+"test/Thalassionema/18_1.png",Thalassionema,Thalassionema,0.9996
+"test/Thalassionema/18_2.png",Thalassionema,Thalassionema,0.9978
+"test/Thalassiosira/19_0.png",Thalassiosira,Thalassiosira,0.9996
+"test/Thalassiosira/19_1.png",Thalassiosira,Thalassiosira,0.9952
+"test/Thalassiosira/19_2.png",Thalassiosira,Thalassiosira,0.9999
+"test/Thalassiosira/19_3.png",Thalassiosira,Thalassiosira,0.9998
+"test/Thalassiosira/19_4.png",Thalassiosira,Thalassiosira,0.9982
+"test/Thalassiosira/19_5.png",Thalassiosira,Thalassiosira,0.9999
+"test/Thalassiosira/19_6.png",Thalassiosira,Thalassiosira,1.0000

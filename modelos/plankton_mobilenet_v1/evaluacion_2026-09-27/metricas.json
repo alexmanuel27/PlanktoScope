@@ -1,0 +1,309 @@
+{
+  "modelo": "/Users/alex/Nube /nube/investigacion/doctorado/Planktoscope/ml_plankton/plankton_mobilenet_v1.tflite",
+  "md5_modelo": "6596e444cb921de26ba7ed1a0e7d09c0",
+  "salidas": 19,
+  "clases": [
+    "Alexandrium",
+    "Asterionellopsis glacialis",
+    "Cerataulina",
+    "Ceratium",
+    "Chaetoceros",
+    "Entomoneis",
+    "Guinardia",
+    "Hemiaulus",
+    "Lauderia annulata",
+    "Nitzschia",
+    "Noctiluca",
+    "Ornithocercus magnificus",
+    "Pinnularia",
+    "Pleurosigma",
+    "Prorocentrum",
+    "Protoperidinium",
+    "Pyrodinium",
+    "Thalassionema",
+    "Thalassiosira"
+  ],
+  "umbral_dhash": 5,
+  "descartadas_de_test+val": {
+    "exacta": 126,
+    "casi": 3,
+    "repetida": 1
+  },
+  "n_training": 2872,
+  "subconjuntos": {
+    "test_original": {
+      "n": 118,
+      "exactitud": 1.0,
+      "top3": 1.0,
+      "f1_macro_clases_presentes": 1.0,
+      "confianza_media_aciertos": 0.9836392402648926,
+      "confianza_media_fallos": null,
+      "por_clase": {
+        "Alexandrium": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 2.0
+        },
+        "Asterionellopsis glacialis": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 19.0
+        },
+        "Cerataulina": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 15.0
+        },
+        "Ceratium": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 12.0
+        },
+        "Chaetoceros": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 7.0
+        },
+        "Entomoneis": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 5.0
+        },
+        "Guinardia": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 14.0
+        },
+        "Hemiaulus": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 2.0
+        },
+        "Lauderia annulata": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 4.0
+        },
+        "Nitzschia": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 3.0
+        },
+        "Noctiluca": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 2.0
+        },
+        "Ornithocercus magnificus": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 2.0
+        },
+        "Pinnularia": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 2.0
+        },
+        "Pleurosigma": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 4.0
+        },
+        "Prorocentrum": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 11.0
+        },
+        "Protoperidinium": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 3.0
+        },
+        "Pyrodinium": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 1.0
+        },
+        "Thalassionema": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 3.0
+        },
+        "Thalassiosira": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 7.0
+        }
+      },
+      "app": {
+        "labels_app": [
+          "Ceratium",
+          "Copepod",
+          "Diatom",
+          "Dinoflagellate",
+          "Other"
+        ],
+        "fraccion_error_indice": 0.5338983050847458,
+        "fraccion_nombre_correcto": 0.0
+      }
+    },
+    "limpio": {
+      "n": 81,
+      "exactitud": 0.8395061728395061,
+      "top3": 0.9629629629629629,
+      "f1_macro_clases_presentes": 0.7717062818336163,
+      "confianza_media_aciertos": 0.9476242065429688,
+      "confianza_media_fallos": 0.7392969131469727,
+      "por_clase": {
+        "Alexandrium": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 1.0
+        },
+        "Asterionellopsis glacialis": {
+          "precision": 1.0,
+          "recall": 0.8235294117647058,
+          "f1-score": 0.9032258064516129,
+          "support": 17.0
+        },
+        "Cerataulina": {
+          "precision": 0.7777777777777778,
+          "recall": 1.0,
+          "f1-score": 0.875,
+          "support": 14.0
+        },
+        "Ceratium": {
+          "precision": 0.8181818181818182,
+          "recall": 1.0,
+          "f1-score": 0.9,
+          "support": 9.0
+        },
+        "Chaetoceros": {
+          "precision": 0.6,
+          "recall": 0.75,
+          "f1-score": 0.6666666666666666,
+          "support": 4.0
+        },
+        "Entomoneis": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 3.0
+        },
+        "Guinardia": {
+          "precision": 0.875,
+          "recall": 0.5833333333333334,
+          "f1-score": 0.7,
+          "support": 12.0
+        },
+        "Hemiaulus": {
+          "precision": 1.0,
+          "recall": 0.5,
+          "f1-score": 0.6666666666666666,
+          "support": 2.0
+        },
+        "Lauderia annulata": {
+          "precision": 0.5,
+          "recall": 1.0,
+          "f1-score": 0.6666666666666666,
+          "support": 1.0
+        },
+        "Nitzschia": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 1.0
+        },
+        "Noctiluca": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 1.0
+        },
+        "Ornithocercus magnificus": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 0.0
+        },
+        "Pinnularia": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 0.0
+        },
+        "Pleurosigma": {
+          "precision": 0.5,
+          "recall": 0.5,
+          "f1-score": 0.5,
+          "support": 2.0
+        },
+        "Prorocentrum": {
+          "precision": 0.9,
+          "recall": 1.0,
+          "f1-score": 0.9473684210526315,
+          "support": 9.0
+        },
+        "Protoperidinium": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 1.0
+        },
+        "Pyrodinium": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 0.0
+        },
+        "Thalassionema": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 0.0
+        },
+        "Thalassiosira": {
+          "precision": 0.75,
+          "recall": 0.75,
+          "f1-score": 0.75,
+          "support": 4.0
+        }
+      },
+      "app": {
+        "labels_app": [
+          "Ceratium",
+          "Copepod",
+          "Diatom",
+          "Dinoflagellate",
+          "Other"
+        ],
+        "fraccion_error_indice": 0.3950617283950617,
+        "fraccion_nombre_correcto": 0.0
+      }
+    }
+  },
+  "dhash_min_limpio": {
+    "min": 6,
+    "mediana": 15.0
+  }
+}

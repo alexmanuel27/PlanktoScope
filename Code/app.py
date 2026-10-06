@@ -261,6 +261,7 @@ def handle_config():
         try:
             new_config = request.json
             for key in ["stepper1", "stepper2"]:
+                new_config[key] = {**config.get(key, {}), **new_config[key]}  # conservar lo que la web no envía (delay, rampa)
                 new_config[key]["dir_pin"] = int(new_config[key]["dir_pin"])
                 new_config[key]["step_pin"] = int(new_config[key]["step_pin"])
                 new_config[key]["enable_pin"] = int(new_config[key]["enable_pin"])

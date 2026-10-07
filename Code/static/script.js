@@ -11,7 +11,7 @@ const app = {
     if (target) target.style.display = 'block';
     this.currentView = viewName;
     document.querySelectorAll('#sidebar a').forEach(a => a.classList.remove('active'));
-    event.target.classList.add('active');
+    if (window.event && event.target && event.target.classList) event.target.classList.add('active');
     if (viewName === 'samples') this.loadSamples();
     if (viewName === 'live') {
       this.connectLiveConsole();
@@ -28,7 +28,9 @@ const app = {
       .then(samples => {
         body.innerHTML = samples.length ? samples.map(s => `
           <tr>
-            <td>${s.id}</td>
+            <td>${s.type === 'photo' || s.type === 'video'
+              ? `<a href="#" onclick="app.viewSample('${s.id}', '${s.type}'); return false;">${s.id}</a>`
+              : s.id}</td>
             <td>${s.time}</td>
             <td>${s.type}</td>
             <td>
@@ -41,6 +43,13 @@ const app = {
       .catch(err => {
         body.innerHTML = `<tr><td colspan="4" style="color:#ef4444;">Load error: ${err.message}</td></tr>`;
       });
+  },
+
+  viewSample(id, type) {
+    const v = document.getElementById("viewer");
+    const url = `/samples/${encodeURIComponent(id)}`;
+    v.innerHTML = type === "video" ? `<video src="${url}" controls autoplay></video>` : `<img src="${url}" alt="${id}">`;
+    v.style.display = "flex";
   },
 
   connectLiveConsole() {

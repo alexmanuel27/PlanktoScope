@@ -106,5 +106,7 @@
 </div>
 
 <script src="{{ url_for('static', filename='script.js') }}"></script>
+<!-- Visor de muestras: tocar fuera de la imagen para cerrar -->
+<div id="viewer" onclick="if (event.target === this) { this.style.display = 'none'; this.innerHTML = ''; }"></div>
 </body>
 </html>

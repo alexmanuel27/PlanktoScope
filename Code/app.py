@@ -1,5 +1,5 @@
 # app.py
-from flask import Flask, render_template, jsonify, send_file, Response, request
+from flask import Flask, render_template, jsonify, send_file, send_from_directory, Response, request
 import time
 import os
 import subprocess
@@ -522,6 +522,11 @@ def list_samples():
             })
     files.sort(key=lambda x: x["time"], reverse=True)
     return jsonify(files)
+
+@app.route("/samples/<filename>")
+def view_sample(filename):
+    """Para verla en el navegador (sin descargar)."""
+    return send_from_directory(SAMPLES_DIR, filename)
 
 @app.route("/download/<filename>")
 def download_sample(filename):

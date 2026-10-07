@@ -201,3 +201,8 @@ tr:hover { background: #f1f5f9; }
   #overlay.active { display: block; }
   #menu-toggle { display: block; }
 }
+
+/* Visor de muestras */
+#viewer { display: none; position: fixed; inset: 0; z-index: 1000; background: rgba(0, 0, 0, .88);
+          align-items: center; justify-content: center; cursor: zoom-out; }
+#viewer img, #viewer video { max-width: 96vw; max-height: 96vh; cursor: default; }

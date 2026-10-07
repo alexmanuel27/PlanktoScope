@@ -87,12 +87,6 @@ const app = {
             this.logLive(`Classification summary: ${data.summary}`);
           }
           
-          // ✅ Mostrar indicador de calidad del agua
-          if (data.water_quality) {
-            const wq = data.water_quality;
-            this.logLive(`Water quality: ${wq.category} (score: ${wq.score}) → Color: ${wq.color}`);
-          }
-          
           if (this.currentView === "samples") this.loadSamples();
         } else {
           this.logLive("Capture failed");
@@ -250,7 +244,9 @@ const app = {
   toggleIgnoreLimits() {
     const ignore = document.getElementById("ignore-focus-limits").checked;
     fetch("/api/focus/ignore", {
-      method: "POST"
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ignore: ignore})
     })
     .then(res => res.json())
     .then(data => {
@@ -263,18 +259,28 @@ const app = {
   },
 
   init() {
-    fetch("/api/focus/current")
+    // La Raspberry no tiene internet ni reloj propio: le pasamos la hora de este ordenador
+    fetch("/api/time", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({epoch: Date.now() / 1000})
+    }).catch(() => {});
+
+    // Estado real del equipo: el mismo en cualquier ordenador que abra la página
+    fetch("/api/state")
       .then(r => r.json())
       .then(data => {
-        this.focus_step = data.step;
-        document.getElementById("focus-value").textContent = data.step;
+        this.focus_step = data.focus_step;
+        document.getElementById("focus-value").textContent = data.focus_step;
+        this.ledState = data.led;
+        this.updateLedButton();
+        this.ignore_focus_limits = data.ignore_focus_limits;
+        document.getElementById("ignore-focus-limits").checked = data.ignore_focus_limits;
       })
       .catch(() => {
-        this.focus_step = 100;
-        document.getElementById("focus-value").textContent = "100";
+        document.getElementById("focus-value").textContent = "—";   // nunca inventar un valor
       });
 
-    this.ledState = false;
     this.showView('samples');
     const menuToggle = document.getElementById("menu-toggle");
     const overlay = document.getElementById("overlay");

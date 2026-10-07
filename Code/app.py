@@ -1,7 +1,6 @@
 # app.py
 from flask import Flask, render_template, jsonify, send_file, Response, request
 import time
-import io
 import os
 import subprocess
 import threading
@@ -13,6 +12,9 @@ import cv2
 import numpy as np
 import RPi.GPIO as GPIO
 import math
+import tempfile
+import zipfile
+import atexit
 
 try:
     from picamera2 import Picamera2
@@ -30,19 +32,6 @@ try:
 except Exception as e:
     CLASSIFIER_AVAILABLE = False
     print(f"❌ Classifier error: {e}")
-
-# ========== Cargar información de especies ==========
-SPECIES_INFO_PATH = os.path.join(os.path.dirname(__file__), "ml", "species_info.json")
-SPECIES_INFO = {}
-if os.path.exists(SPECIES_INFO_PATH):
-    try:
-        with open(SPECIES_INFO_PATH, "r") as f:
-            SPECIES_INFO = json.load(f)
-        print("✅ Species info loaded")
-    except Exception as e:
-        print(f"❌ Species info error: {e}")
-else:
-    print(f"❌ Species info file not found at {SPECIES_INFO_PATH}")
 
 app = Flask(__name__)
 SAMPLES_DIR = os.path.join(os.path.dirname(__file__), "samples")
@@ -77,152 +66,47 @@ def annotate_frame(frame, classifications):
         cv2.putText(frame, label_text, (text_x, text_y), font, font_scale, color, thickness)
     return frame
 
-# ========== Función para añadir la barra de calidad del agua a la imagen ==========
-# ========== Función para añadir la barra de calidad del agua a la imagen ==========
-# ========== Función para añadir la barra de calidad del agua a la imagen ==========
-# ========== Función para añadir la barra de calidad del agua a la imagen ==========
-# ========== Función para añadir la barra de calidad del agua a la imagen ==========
-def add_water_quality_bar(frame, water_quality):
-    """Añade una barra vertical degradada (rojo arriba → verde abajo) y texto cualitativo debajo de la barra."""
-    H, W = frame.shape[:2]
-    
-    # Tamaño de la barra
-    bar_width = 30
-    bar_height = H
-    bar_x = W - bar_width
-    
-    # Crear barra degradada (rojo arriba → verde abajo)
-    bar = np.zeros((bar_height, bar_width, 3), dtype=np.uint8)
-    for i in range(bar_height):
-        ratio = i / bar_height  # 0=abajo, 1=arriba
-        # Interpolar entre rojo (arriba) y verde (abajo)
-        r = int(255 * (1 - ratio))  # rojo disminuye de 255 a 0
-        g = int(255 * ratio)        # verde aumenta de 0 a 255
-        b = 0                       # azul siempre 0
-        bar[i, :, :] = [b, g, r]  # BGR
-    
-    # Dibujar barra en la imagen (sin borde)
-    frame[:, bar_x:] = bar
-    
-    # Calcular posición del indicador según el score
-    if water_quality:
-        score = water_quality.get("score", 0.0)
-        category = water_quality.get("category", "unknown")
-        color = water_quality.get("color", "gray")
-        
-        # Posición vertical del indicador (0=abajo, 1=arriba)
-        # ✅ Invertido: 1-score para que 0.7 vaya arriba
-        y_pos = int((1 - score) * (bar_height - 1))
-        
-        # Dibujar un pequeño rectángulo blanco en la posición
-        cv2.rectangle(frame, (bar_x, y_pos - 2), (bar_x + bar_width - 1, y_pos + 2), (255, 255, 255), 2)
-        
-        # Añadir texto cualitativo DEBAJO de la barra
-        text = f"{category} (score: {score:.2f})"
-        font = cv2.FONT_HERSHEY_SIMPLEX
-        font_scale = 0.5
-        thickness = 1
-        text_size = cv2.getTextSize(text, font, font_scale, thickness)[0]
-        
-        # Posición: debajo de la barra, centrado horizontalmente
-        text_x = bar_x + (bar_width - text_size[0]) // 2
-        text_y = bar_height + text_size[1] + 5  # 5 píxeles de margen
-        
-        # Dibujar fondo oscuro para el texto
-        cv2.rectangle(frame, (text_x - 5, text_y - text_size[1] - 5), (text_x + text_size[0] + 5, text_y + 5), (0, 0, 0), -1)
-        
-        # Dibujar texto
-        cv2.putText(frame, text, (text_x, text_y), font, font_scale, (255, 255, 255), thickness)
-    
-    return frame
-
-
-
-
-# ========== Función para calcular calidad del agua ==========
-def calculate_water_quality(classifications):
-    """Calcula un indicador de calidad del agua basado en las clasificaciones."""
-    if not classifications:
-        return {"score": 0.0, "category": "unknown", "color": "gray"}
-    
-    # Contar ocurrencias por especie
-    counts = {}
-    for obj in classifications:
-        label = obj["label"]
-        if label != "unknown":
-            counts[label] = counts.get(label, 0) + 1
-    
-    if not counts:
-        return {"score": 0.0, "category": "unknown", "color": "gray"}
-    
-    # Calcular score ponderado
-    total_count = sum(counts.values())
-    weighted_score = 0.0
-    dominant_species = max(counts.items(), key=lambda x: x[1])[0]
-    
-    for species, count in counts.items():
-        tolerance = SPECIES_INFO.get(species, {}).get("pollution_tolerance", 0.5)
-        weighted_score += count * tolerance
-    
-    avg_score = weighted_score / total_count
-    
-    # Determinar categoría
-    if avg_score <= 0.3:
-        category = "oligotrophic"
-        color = "green"
-    elif avg_score <= 0.6:
-        category = "mesotrophic"
-        color = "yellow"
-    else:
-        category = "eutrophic"
-        color = "red"
-    
-    # Usar el color de la especie dominante si está definido
-    dominant_color = SPECIES_INFO.get(dominant_species, {}).get("color", color)
-    
-    return {
-        "score": round(avg_score, 2),
-        "category": category,
-        "color": dominant_color,
-        "dominant": dominant_species,
-        "counts": counts
-    }
-
 # ========== Cargar configuración ==========
 def load_config():
     default_config = {
-        "stepper1": {"dir_pin": 26, "step_pin": 19, "enable_pin": 9, "steps_take_sample": 2000, "delay": 0.0005},
-        "stepper2": {"dir_pin": 5, "step_pin": 6, "enable_pin": 13, "steps_focus": 100, "delay": 0.0005, "focus_min": 40, "focus_max": 60}
+        "stepper1": {"dir_pin": 26, "step_pin": 19, "enable_pin": 13, "steps_take_sample": 2000, "delay": 0.002,
+                     "ramp_steps": 200, "led_delay_after_pump": 1.0},
+        "stepper2": {"dir_pin": 5, "step_pin": 6, "enable_pin": 9, "steps_focus": 100, "delay": 0.002, "ramp_steps": 0,
+                     "focus_min": 40, "focus_max": 60}
     }
     if os.path.exists(CONFIG_FILE):
         with open(CONFIG_FILE, "r") as f:
             config = json.load(f)
             for key in ["stepper1", "stepper2"]:
-                if key not in config:
-                    config[key] = default_config[key]
+                config[key] = {**default_config[key], **config.get(key, {})}  # rellena solo lo que falte
     else:
         config = default_config
         save_config(config)
     return config
 
+def guardar_json(path, data):
+    """Escritura atómica: o queda el fichero viejo entero o el nuevo entero, nunca uno a medias."""
+    tmp = path + ".tmp"
+    with open(tmp, "w") as f:
+        json.dump(data, f, indent=4)
+        f.flush()
+        os.fsync(f.fileno())
+    os.replace(tmp, path)
+
 def save_config(config):
-    with open(CONFIG_FILE, "w") as f:
-        json.dump(config, f, indent=4)
+    guardar_json(CONFIG_FILE, config)
 
 # ========== Cargar/guardar estado del foco ==========
 def load_focus_state():
-    default_state = {"step": 100}
-    if os.path.exists(FOCUS_STATE_JFILE):
-        try:
-            with open(FOCUS_STATE_JFILE, "r") as f:
-                return json.load(f)
-        except:
-            pass
-    return default_state
+    try:
+        with open(FOCUS_STATE_JFILE, "r") as f:
+            return json.load(f)
+    except Exception as e:
+        print(f"⚠️ focus_state.json no se pudo leer ({e}); el foco arranca en 100 y NO es su posición real")
+        return {"step": 100}
 
 def save_focus_state(state):
-    with open(FOCUS_STATE_JFILE, "w") as f:
-        json.dump(state, f)
+    guardar_json(FOCUS_STATE_JFILE, state)
 
 # ========== Cargar/guardar contador ==========
 def load_counter():
@@ -236,8 +120,7 @@ def load_counter():
     return default
 
 def save_counter(counter):
-    with open(COUNTER_FILE, "w") as f:
-        json.dump(counter, f)
+    guardar_json(COUNTER_FILE, counter)
 
 # ========== Rutas y funciones ==========
 @app.route("/")
@@ -276,8 +159,7 @@ def handle_config():
             
             _motor_lock.acquire()  # esperar a que termine cualquier movimiento
             try:
-                GPIO.cleanup()
-                GPIO.setmode(GPIO.BCM)
+                # sin GPIO.cleanup(): soltar los pines dejaría EN a GND y activaría los motores
             
                 GPIO.setup(config["stepper1"]["dir_pin"], GPIO.OUT)
                 GPIO.setup(config["stepper1"]["step_pin"], GPIO.OUT)
@@ -307,16 +189,56 @@ def get_focus_current():
 @app.route("/api/focus/ignore", methods=["POST"])
 def toggle_ignore_limits():
     global ignore_focus_limits
-    ignore_focus_limits = not ignore_focus_limits
+    data = request.get_json(silent=True) or {}
+    ignore_focus_limits = bool(data["ignore"]) if "ignore" in data else not ignore_focus_limits
     log_to_console(f"Focus limits ignored: {ignore_focus_limits}")
     return jsonify(status="ok", ignore=ignore_focus_limits)
+
+def led_hw(on, suave=False):
+    """Enciende/apaga el LED (lógica invertida: LOW = encendido). suave=True sube en ~0,5 s con PWM
+    para que el pico de corriente del encendido no llegue de golpe."""
+    if on and suave:
+        try:
+            p = GPIO.PWM(LED_PIN, 200)
+            p.start(100)                        # 100 % en alto = apagado
+            for d in range(100, -1, -5):
+                p.ChangeDutyCycle(d)
+                time.sleep(0.025)
+            p.stop()
+            del p
+        except Exception as e:
+            log_to_console(f"LED soft-start error: {e}")
+    GPIO.output(LED_PIN, GPIO.LOW if on else GPIO.HIGH)
+
+@app.route("/api/time", methods=["POST"])
+def sync_time():
+    """La Raspberry no tiene internet ni reloj con pila: si su hora se desvía más de 1 min de la del
+    navegador que se conecta, la corrige (el servicio corre como alex, que tiene sudo sin contraseña)."""
+    try:
+        t = float((request.get_json(silent=True) or {})["epoch"])
+    except Exception:
+        return jsonify(error="epoch requerido"), 400
+    if t < 1.7e9:                                   # hora del navegador absurda (antes de 2023): no tocar
+        return jsonify(error="hora del navegador no válida"), 400
+    diff = t - time.time()
+    if abs(diff) > 60:
+        r = subprocess.run(["sudo", "-n", "date", "-s", f"@{int(t)}"], capture_output=True, text=True)
+        if r.returncode != 0:
+            log_to_console(f"No se pudo poner la hora: {r.stderr.strip()}")
+            return jsonify(error="sudo date falló"), 500
+        log_to_console(f"Hora corregida desde el navegador ({diff:+.0f} s)")
+    return jsonify(status="ok", diff=round(diff))
+
+@app.route("/api/state")
+def get_state():
+    """Lo que cada navegador debe mostrar al abrir la página, venga de donde venga."""
+    return jsonify(focus_step=focus_step, led=led_state, ignore_focus_limits=ignore_focus_limits)
 
 @app.route("/api/led/toggle")
 def toggle_led():
     global led_state
     led_state = not led_state
-    gpio_value = GPIO.LOW if led_state else GPIO.HIGH
-    GPIO.output(LED_PIN, gpio_value)
+    led_hw(led_state, suave=True)
     status = "ON" if led_state else "OFF"
     log_to_console(f"LED turned {status}")
     return jsonify(state=led_state, status=status)
@@ -372,7 +294,14 @@ def take_sample():
     try:
         steps = config["stepper1"]["steps_take_sample"]
         log_to_console(f"Moving stepper1 ({steps} steps)")
-        move_stepper("stepper1", "forward", steps)
+        if led_state:
+            led_hw(False)                       # ahorrar: LED apagado mientras gira la bomba
+        try:
+            move_stepper("stepper1", "forward", steps)
+        finally:
+            if led_state:
+                time.sleep(config["stepper1"].get("led_delay_after_pump", 1.0))
+                led_hw(True, suave=True)
         return jsonify(sample={"id": "sample_taken", "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"), "type": "data"})
     except Exception as e:
         log_to_console(f"Sample error: {str(e)}")
@@ -481,10 +410,6 @@ if CAMERA_AVAILABLE:
                 })
                 os.remove(obj_path)
             
-            # ✅ Calcular calidad del agua
-            water_quality = calculate_water_quality(classifications)
-            log_to_console(f"Water quality: {water_quality['category']} (score: {water_quality['score']}) → Color: {water_quality['color']}")
-            
             # Generar resumen
             class_count = {}
             for obj in classifications:
@@ -509,22 +434,16 @@ if CAMERA_AVAILABLE:
                 label_text = f"{label} ({int(confidence)}%)" if confidence > 0 else "unknown"
                 cv2.putText(annotated_frame, label_text, (x+5, y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
             
-            # ✅ Añadir barra de calidad del agua (con texto debajo)
-            annotated_frame_with_bar = add_water_quality_bar(annotated_frame, water_quality)
-            
-            last_annotated_frame = annotated_frame_with_bar
+            last_annotated_frame = annotated_frame
             last_annotation_time = time.time()
             
-            # ✅ Guardar imagen con nombre que incluye categoría y score
+            # Guardar la anotada y renombrar la cruda con el mismo nombre + _raw
             if classifications:
                 first_class = classifications[0]["label"]
-                first_conf = int(classifications[0]["confidence"])
-                category = water_quality.get("category", "unknown")
-                score = water_quality.get("score", 0.0)
-                stem = f"plankton_{first_class}_{score:.2f}_{category}_{counter['photo']}"  # el número evita sobrescribir
+                stem = f"plankton_{first_class}_{counter['photo']}"  # el número evita sobrescribir
                 annotated_filename = f"{stem}.jpg"
                 annotated_path = os.path.join(SAMPLES_DIR, annotated_filename)
-                cv2.imwrite(annotated_path, annotated_frame_with_bar)
+                cv2.imwrite(annotated_path, annotated_frame)
                 os.replace(img_path, os.path.join(SAMPLES_DIR, f"{stem}_raw.jpg"))  # la cruda pasa a llamarse como la clasificada
                 log_to_console(f"Annotated image saved: {annotated_filename} (+ {stem}_raw.jpg)")
                 final_filename = annotated_filename
@@ -537,8 +456,7 @@ if CAMERA_AVAILABLE:
                 "class": "multiple",
                 "confidence": 0.0,
                 "objects": classifications,
-                "summary": class_list,
-                "water_quality": water_quality
+                "summary": class_list
             })
             
         except Exception as e:
@@ -566,7 +484,8 @@ if CAMERA_AVAILABLE:
         elif action == "stop" and recording:
             def stop_and_convert():
                 try:
-                    camera.stop_recording()
+                    camera.stop_recording()     # en picamera2 esto también PARA la cámara
+                    camera.start()              # sin esto, la vista en vivo y las fotos se quedaban colgadas
                     log_to_console("Recording stopped.")
                 except Exception as e:
                     log_to_console(f"Stop error: {e}")
@@ -613,8 +532,12 @@ def download_sample(filename):
 
 @app.route("/download/all")
 def download_all():
-    files = "\n".join(os.listdir(SAMPLES_DIR))
-    return send_file(io.BytesIO(files.encode()), mimetype="text/plain", as_attachment=True, download_name="all_samples.txt")
+    zpath = os.path.join(tempfile.gettempdir(), "planktoscope_samples.zip")
+    with zipfile.ZipFile(zpath, "w", zipfile.ZIP_STORED) as z:   # jpg/mp4 ya van comprimidos
+        for f in sorted(os.listdir(SAMPLES_DIR)):
+            if f.lower().endswith(('.jpg', '.jpeg', '.mp4', '.txt')):
+                z.write(os.path.join(SAMPLES_DIR, f), f)
+    return send_file(zpath, as_attachment=True, download_name="planktoscope_samples.zip")
 
 @app.route("/api/samples/delete/<filename>", methods=["DELETE"])
 def delete_sample(filename):
@@ -656,6 +579,7 @@ focus_step = focus_state["step"]
 counter = load_counter()
 
 # ========== GPIO ==========
+GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(config["stepper1"]["dir_pin"], GPIO.OUT)
 GPIO.setup(config["stepper1"]["step_pin"], GPIO.OUT)
@@ -691,8 +615,11 @@ if CAMERA_AVAILABLE:
     camera.start()
     log_to_console("Camera started")
 
-import atexit
-atexit.register(GPIO.cleanup)
+def _motores_off():
+    for k in ("stepper1", "stepper2"):
+        GPIO.output(config[k]["enable_pin"], GPIO.HIGH)
+
+atexit.register(_motores_off)  # al salir, motores desactivados y pines sin soltar (nada de GPIO.cleanup)
 
 if __name__ == "__main__":
     log_to_console("Modular PlanktoScope started")

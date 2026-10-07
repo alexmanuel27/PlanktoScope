@@ -81,6 +81,14 @@ y los recortes que van al clasificador salen del flujo de baja resolución. El s
 el clasificador ve unas 6 veces menos detalle lineal del que da la cámara. Lo que se ve con buen enfoque en la
 resolución completa no es lo que recibe el modelo.
 
+### A4c. Arranque con motores (06/10/2026, verificado en el equipo)
+
+En la placa montada (versión posterior a la del repo) cada EN lleva una resistencia **a GND**. Como EN es activo en
+bajo, los dos drivers quedan activados desde el primer instante y **la Raspberry no arranca con los motores
+conectados**. `gpio=9,13=op,dh,pu` en `config.txt` no basta, porque el firmware la aplica tarde. Procedimiento hasta la
+próxima versión: **arrancar sin alimentar los motores**. La corrección (resistencia a 3,3 V) va en el próximo HAT.
+Subir al repo el KiCad de la placa montada.
+
 ### A5. Conflicto de entornos (K2.1): mecanismo ya visible en el historial
 
 El 02/12/2025, dentro del venv: `picamera2` instalado con pip → `ModuleNotFoundError: No module named

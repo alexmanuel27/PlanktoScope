@@ -1,7 +1,6 @@
 [Unit]
 Description=Modular PlanktoScope Web Interface
-After=multi-user.target
-Wants=multi-user.target
+# Sin After/Wants=multi-user.target: junto con WantedBy=multi-user.target forma un ciclo de dependencias
 
 [Service]
 Type=simple
@@ -9,10 +8,11 @@ User=alex
 Group=alex
 WorkingDirectory=/home/alex/PlanktoScope/Code
 Environment=PYTHONUNBUFFERED=1
-# ✅ Usar el Python del entorno virtual
+# Un único intérprete: el venv con acceso a los paquetes del sistema (picamera2/libcamera) + ai_edge_litert
 ExecStart=/home/alex/PlanktoScope/Code/planktoscope-env/bin/python app.py
 Restart=always
-RestartSec=30
+# Si la cámara aún no está lista al arrancar, la app falla y systemd la relanza
+RestartSec=5
 StandardOutput=journal
 StandardError=journal
 

@@ -10,3 +10,8 @@ node_modules
 # PlanktoScope config files
 hardware.json
 config.json
+
+# Estado de la Raspberry: vive en la Raspberry, no en el repo (si no, un despliegue lo pisa)
+focus_state.json
+counter.json
+*.tmp

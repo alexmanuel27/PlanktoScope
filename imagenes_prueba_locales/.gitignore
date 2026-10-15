@@ -1,0 +1,11 @@
+# Imágenes de prueba: se quedan en local, no van a git
+*.jpg
+*.jpeg
+*.png
+*.tif
+*.tiff
+*.bmp
+*.JPG
+*.JPEG
+*.PNG
+resultados/

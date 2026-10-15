@@ -1,7 +1,11 @@
 import json
 import numpy as np
 from PIL import Image
-from ai_edge_litert.interpreter import Interpreter
+try:
+    from ai_edge_litert.interpreter import Interpreter
+except ImportError:  # en el Mac de pruebas el mismo intérprete viene dentro de TensorFlow
+    import tensorflow as tf
+    Interpreter = tf.lite.Interpreter
 import os
 
 # Ruta absoluta al directorio actual
@@ -27,33 +31,17 @@ input_details = interpreter.get_input_details()
 output_details = interpreter.get_output_details()
 
 
-def classify_image(image_path: str) -> dict:
-    """
-    Classify a plankton image.
-
-    Returns:
-        {
-            "label": str,
-            "confidence": float
-        }
-    """
-
-    # Load and preprocess image
-    img = Image.open(image_path).convert("RGB")
-    img = img.resize((IMG_SIZE, IMG_SIZE))
-    img_array = np.array(img, dtype=np.float32) / 255.0
-    img_array = np.expand_dims(img_array, axis=0)
-
-    # Run inference
-    interpreter.set_tensor(input_details[0]["index"], img_array)
+def probabilidades(img):
+    """img: PIL.Image. Vector de probabilidades, una por clase (orden de labels.json)."""
+    img = img.convert("RGB").resize((IMG_SIZE, IMG_SIZE))
+    x = np.expand_dims(np.array(img, dtype=np.float32) / 255.0, axis=0)
+    interpreter.set_tensor(input_details[0]["index"], x)
     interpreter.invoke()
+    return interpreter.get_tensor(output_details[0]["index"])[0]
 
-    predictions = interpreter.get_tensor(output_details[0]["index"])[0]
 
-    class_id = int(np.argmax(predictions))
-    confidence = float(predictions[class_id])
-
-    return {
-        "label": labels[class_id],
-        "confidence": round(confidence * 100, 2)
-    }
+def classify_image(image_path: str) -> dict:
+    """{"label": str, "confidence": float en %} de la clase más probable."""
+    p = probabilidades(Image.open(image_path))
+    k = int(np.argmax(p))
+    return {"label": labels[k], "confidence": round(float(p[k]) * 100, 2)}

@@ -24,6 +24,8 @@ try:
 except ImportError:
     CAMERA_AVAILABLE = False
 
+from ml.detector import detectar  # solo necesita OpenCV: la detección funciona aunque falle el clasificador
+
 # ========== Clasificador de plancton ==========
 try:
     from ml.classifier import classify_image
@@ -351,42 +353,8 @@ if CAMERA_AVAILABLE:
             cv2.imwrite(img_path, bgr_frame)
             log_to_console(f"Image captured: {img_filename}")
             
-            H, W = bgr_frame.shape[:2]
-            gray = cv2.cvtColor(bgr_frame, cv2.COLOR_BGR2GRAY)
-            clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
-            gray = clahe.apply(gray)
-            blur = cv2.GaussianBlur(gray, (5,5), 0)
-            th = cv2.adaptiveThreshold(
-                blur, 255,
-                cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
-                cv2.THRESH_BINARY_INV,
-                31, 3
-            )
-            kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3,3))
-            th = cv2.morphologyEx(th, cv2.MORPH_OPEN, kernel, iterations=2)
-            cnts, _ = cv2.findContours(th, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-            
-            min_area = 0.0005 * H * W
-            max_area = 0.01 * H * W
-            
             classifications = []
-            for c in cnts:
-                area = cv2.contourArea(c)
-                if area < min_area or area > max_area:
-                    continue
-                
-                peri = cv2.arcLength(c, True)
-                if peri == 0:
-                    continue
-                    
-                circularity = 4 * math.pi * area / (peri * peri)
-                elongation = 1.0
-                if len(c) >= 5:
-                    (_, _), (MA, ma), _ = cv2.fitEllipse(c)
-                    if MA > 0:
-                        elongation = ma / MA
-                
-                x, y, w, h = cv2.boundingRect(c)
+            for (x, y, w, h) in detectar(bgr_frame):   # ml/detector.py
                 obj_img = bgr_frame[y:y+h, x:x+w]
                 obj_path = os.path.join(SAMPLES_DIR, f"temp_obj_{counter['photo']}_{len(classifications)}.jpg")
                 cv2.imwrite(obj_path, obj_img)

@@ -60,6 +60,7 @@
           <button class="btn" onclick="app.focusMotor('out')">–</button>
           <span id="focus-value">—</span>
           <button class="btn" onclick="app.focusMotor('in')">+</button>
+          <button class="btn" onclick="app.autoFocus()">Auto Focus</button>
           <span>Focus Step</span>
           <label style="margin-left: 15px; display: inline-flex; align-items: center; gap: 5px;">
             <input type="checkbox" id="ignore-focus-limits">
@@ -69,6 +70,7 @@
       </div>
       <div class="btn-group live-buttons">
         <button class="btn" onclick="app.capturePhoto()">Capture Photo</button>
+        <button class="btn" onclick="app.captureLayers()">Capture Layers</button>
         <button class="btn" id="videoBtn" onclick="app.toggleVideo()">Start Video</button>
         <button class="btn take-sample" onclick="app.takeSample()">Take Sample</button>
         <button class="btn" id="ledBtn" onclick="app.toggleLed()">LED ON</button>

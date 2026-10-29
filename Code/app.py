@@ -6,7 +6,7 @@ import subprocess
 import threading
 import json
 from datetime import datetime
-from queue import Queue
+from queue import Queue, Empty
 from threading import Lock
 import cv2
 import numpy as np
@@ -254,18 +254,20 @@ def rampa(steps, t_min, t_start, ramp):
         k = min(i, steps - 1 - i, ramp)
         yield t_min if ramp == 0 else t_start - (t_start - t_min) * k / ramp
 
-def move_stepper(stepper_key, direction, steps):
+def move_stepper(stepper_key, direction, steps, delay=None, al_paso=None):
     c = config[stepper_key]
     with _motor_lock:
         GPIO.output(c["dir_pin"], GPIO.HIGH if direction == "forward" else GPIO.LOW)
         GPIO.output(c["enable_pin"], GPIO.LOW)
         time.sleep(0.01)
         try:
-            for d in rampa(steps, c["delay"], c.get("delay_start", 0.002), c.get("ramp_steps", 200)):
+            for d in rampa(steps, delay or c["delay"], c.get("delay_start", 0.002), c.get("ramp_steps", 200)):
                 GPIO.output(c["step_pin"], GPIO.HIGH)
                 time.sleep(d)
                 GPIO.output(c["step_pin"], GPIO.LOW)
                 time.sleep(d)
+                if al_paso:
+                    al_paso()
         finally:
             GPIO.output(c["enable_pin"], GPIO.HIGH)  # desactivar siempre, aunque falle a mitad
 
@@ -336,19 +338,144 @@ if CAMERA_AVAILABLE:
         return Response(generate_frames(),
                         mimetype='multipart/x-mixed-replace; boundary=frame')
 
-    @app.route("/api/capture/photo")
-    def capture_photo():
-        global counter, last_annotated_frame, last_annotation_time
+    # ---------- Autofoco por software ----------
+    # La cámara HQ (IMX477) no tiene autofoco: se mueve el motor de foco y se mide la nitidez de cada posición.
+    def nitidez():
+        """Varianza del laplaciano de la luminancia del flujo lores, reducida a 1/4: más alta = más enfocado.
+        Reducida, el pico es más ancho y el ruido del sensor pesa menos (en el equipo: ~20 en foco frente a ~1,5 fuera)."""
+        y = np.frombuffer(camera.capture_buffer("lores"), dtype=np.uint8)[:640 * 480].reshape(480, 640)
+        y = cv2.resize(y, (160, 120), interpolation=cv2.INTER_AREA)
+        return float(cv2.Laplacian(y, cv2.CV_64F).var())
+
+    def ir_a_foco(paso):
+        global focus_step
+        d = paso - focus_step
+        if d:
+            move_stepper("stepper2", "forward" if d > 0 else "backward", abs(d))
+            focus_step = paso
+
+    def barrido_foco(desde, hasta, delay):
+        """Sube de forma continua de desde a hasta midiendo la nitidez en cada fotograma; devuelve la posición más nítida.
+        Siempre subiendo: la holgura del husillo queda siempre del mismo lado."""
+        ir_a_foco(max(config["stepper2"]["focus_min"], desde - 20))  # llegar a 'desde' ya subiendo
+        ir_a_foco(desde)
+        def avanza():
+            global focus_step
+            focus_step += 1  # al día en cada paso: la medida usa la posición real y, si algo falla, la cuenta no se pierde
+        motor = threading.Thread(target=move_stepper, args=("stepper2", "forward", hasta - desde, delay, avanza))
+        motor.start()
+        medidas = []
+        while not medidas or motor.is_alive():  # al menos una medida, aunque el tramo sea corto
+            # shortcut: posición de cuando se pide el fotograma; el que llega se expuso algo antes (en el barrido rápido,
+            # unos pasos). Si el foco final queda corrido siempre hacia el mismo lado, usar SensorTimestamp
+            p = focus_step
+            medidas.append((nitidez(), p))
+        motor.join()
+        n, mejor = max(medidas)
+        log_to_console(f"AF {desde}..{hasta}: {len(medidas)} medidas, mejor {mejor} (nitidez {n:.1f}, fondo {mediana(medidas):.1f})")
+        return medidas
+
+    def pico(medidas):
+        """Centro del pico: media de las posiciones por encima de media altura, pesada por la nitidez. Con la imagen a 1/4
+        la cima es plana unos pasos y el máximo puro cae en cualquier punto de ella por el ruido."""
+        fondo = mediana(medidas)
+        corte = (max(medidas)[0] + fondo) / 2
+        sobre = [(n - fondo, p) for n, p in medidas if n >= corte]
+        return round(sum(w * p for w, p in sobre) / sum(w for w, _ in sobre))
+
+    def mediana(medidas):
+        return sorted(m for m, _ in medidas)[len(medidas) // 2]
+
+    def buscar_capas(medidas, factor, separacion, maximo):
+        """Picos de la curva de nitidez: de más a menos nítido, se acepta un punto si supera factor×fondo y está a
+        separacion pasos o más de los ya aceptados. Devuelve las posiciones."""
+        fondo, capas = mediana(medidas), []
+        for n, p in sorted(medidas, reverse=True):
+            if n < factor * fondo or len(capas) == maximo:
+                break
+            if all(abs(p - q) >= separacion for q in capas):
+                capas.append(p)
+        return capas
+
+    def apilar(fotos):
+        """Apilado de foco: cada píxel se toma de la foto donde esa zona está más nítida."""
+        nit = np.stack([cv2.GaussianBlur(np.abs(cv2.Laplacian(cv2.cvtColor(f, cv2.COLOR_BGR2GRAY), cv2.CV_32F, ksize=3)), (0, 0), 4)
+                        for f in fotos])
+        return np.take_along_axis(np.stack(fotos), nit.argmax(0)[None, :, :, None], 0)[0]
+
+    def foto_lores():
+        yuv = np.frombuffer(camera.capture_buffer("lores"), dtype=np.uint8).reshape((480 * 3 // 2, 640))
+        return cv2.cvtColor(yuv, cv2.COLOR_YUV2BGR_I420)
+
+    @app.route("/api/focus/auto")
+    def autofocus():
+        if not led_state:
+            return jsonify(error="Enciende el LED antes del autofoco"), 400
+        c = config["stepper2"]
+        lo, hi = c["focus_min"], c["focus_max"]
+        margen = c.get("af_margin", 60)
+        log_to_console(f"Autofocus: barrido continuo {lo}..{hi}")
+        mejor = max(barrido_foco(lo, hi, c["delay"]))[1]              # rápido, todo el rango
+        mejor = pico(barrido_foco(max(lo, mejor - margen), min(hi, mejor + margen), c.get("af_delay_fine", 0.016)))  # lento, ~30 pasos/s
+        ir_a_foco(max(lo, mejor - margen))  # volver subiendo, como en el barrido
+        ir_a_foco(mejor)
+        focus_state["step"] = focus_step
+        save_focus_state(focus_state)
+        log_to_console(f"Autofocus: listo en {focus_step}")
+        return jsonify(step=focus_step)
+
+    @app.route("/api/capture/layers")
+    def capture_layers():
+        """Una foto clasificada en cada capa de foco del capilar y, si hay más de una, la imagen apilada."""
+        global counter
+        if not led_state:
+            return jsonify(error="Enciende el LED antes de capturar capas"), 400
+        c = config["stepper2"]
+        lo, hi = c["focus_min"], c["focus_max"]
+        log_to_console(f"Capas: barrido continuo {lo}..{hi}")
+        curva = barrido_foco(lo, hi, c["delay"])
+        w, fino = c.get("af_layer_window", 25), c.get("af_delay_fine", 0.016)
+        capas = []
+        for p in sorted(buscar_capas(curva, c.get("af_layer_factor", 2.0), c.get("af_layer_sep", 50), c.get("af_layer_max", 6))):
+            p = pico(barrido_foco(max(lo, p - w), min(hi, p + w), fino))  # afinar cada capa en lento
+            if all(abs(p - q) > 10 for q in capas):
+                capas.append(p)
+        capas.sort()
+        log_to_console(f"Capas encontradas: {capas}")
         counter["photo"] += 1
         save_counter(counter)
-        img_filename = f"photo_{counter['photo']}.jpg"
+        fotos, ficheros = [], []
+        for p in capas:                           # de abajo arriba: siempre llegando subiendo
+            ir_a_foco(max(lo, p - w))
+            ir_a_foco(p)
+            time.sleep(0.3)
+            camera.capture_buffer("lores")        # descartar un fotograma de antes de pararse
+            fotos.append(foto_lores())
+            ficheros.append(procesar_foto(fotos[-1], f"_capa{p}", counter["photo"]).get("file"))
+        if len(fotos) > 1:
+            ficheros.append(procesar_foto(apilar(fotos), "_apilada", counter["photo"]).get("file"))
+        focus_state["step"] = focus_step
+        save_focus_state(focus_state)
+        return jsonify(capas=capas, files=ficheros, step=focus_step)
+
+    @app.route("/api/capture/photo")
+    def capture_photo():
+        r = procesar_foto()
+        return jsonify(r), (500 if "error" in r else 200)
+
+    def procesar_foto(bgr_frame=None, sufijo="", numero=None):
+        """Guarda la foto, detecta y clasifica los objetos y guarda la anotada (+ _raw). Sin bgr_frame, la toma ahora."""
+        global counter, last_annotated_frame, last_annotation_time
+        if numero is None:
+            counter["photo"] += 1
+            save_counter(counter)
+            numero = counter["photo"]
+        img_filename = f"photo_{numero}{sufijo}.jpg"
         img_path = os.path.join(SAMPLES_DIR, img_filename)
         
         try:
-            yuv_frame = camera.capture_buffer("lores")
-            yuv_array = np.frombuffer(yuv_frame, dtype=np.uint8)
-            yuv_reshaped = yuv_array.reshape((480 * 3 // 2, 640))
-            bgr_frame = cv2.cvtColor(yuv_reshaped, cv2.COLOR_YUV2BGR_I420)
+            if bgr_frame is None:
+                bgr_frame = foto_lores()
             
             cv2.imwrite(img_path, bgr_frame)
             log_to_console(f"Image captured: {img_filename}")
@@ -356,7 +483,7 @@ if CAMERA_AVAILABLE:
             classifications = []
             for (x, y, w, h) in detectar(bgr_frame):   # ml/detector.py
                 obj_img = bgr_frame[y:y+h, x:x+w]
-                obj_path = os.path.join(SAMPLES_DIR, f"temp_obj_{counter['photo']}_{len(classifications)}.jpg")
+                obj_path = os.path.join(SAMPLES_DIR, f"temp_obj_{numero}{sufijo}_{len(classifications)}.jpg")
                 cv2.imwrite(obj_path, obj_img)
                 
                 result = {"label": "unknown", "confidence": 0.0}
@@ -408,7 +535,7 @@ if CAMERA_AVAILABLE:
             # Guardar la anotada y renombrar la cruda con el mismo nombre + _raw
             if classifications:
                 first_class = classifications[0]["label"]
-                stem = f"plankton_{first_class}_{counter['photo']}"  # el número evita sobrescribir
+                stem = f"plankton_{first_class}_{numero}{sufijo}"  # el número evita sobrescribir
                 annotated_filename = f"{stem}.jpg"
                 annotated_path = os.path.join(SAMPLES_DIR, annotated_filename)
                 cv2.imwrite(annotated_path, annotated_frame)
@@ -418,18 +545,18 @@ if CAMERA_AVAILABLE:
             else:
                 final_filename = img_filename
             
-            return jsonify({
+            return {
                 "status": "ok",
                 "file": final_filename,
                 "class": "multiple",
                 "confidence": 0.0,
                 "objects": classifications,
                 "summary": class_list
-            })
+            }
             
         except Exception as e:
             log_to_console(f"Photo capture error: {e}")
-            return jsonify({"error": "Capture failed"}), 500
+            return {"error": "Capture failed"}
 
     @app.route("/api/capture/video/<action>")
     def capture_video(action):
@@ -536,13 +663,19 @@ def delete_all_samples():
 @app.route("/api/console/stream")
 def console_stream():
     def generate():
-        yield " Modular PlanktoScope console connected.\n\n"
-        while True:
-            if not log_queue.empty():
-                with log_lock:
-                    msg = log_queue.get()
-                yield f" {msg}\n\n"
-            time.sleep(0.3)
+        yield "data: Modular PlanktoScope console connected.\n\n"
+        q = Queue()
+        with log_lock:
+            log_clients.append(q)
+        try:
+            while True:
+                try:
+                    yield f"data: {q.get(timeout=15)}\n\n"  # SSE exige "data:"
+                except Empty:
+                    yield ": ping\n\n"  # al escribir se detecta la pestaña cerrada y se libera su cola
+        finally:
+            with log_lock:
+                log_clients.remove(q)
     return Response(generate(), mimetype="text/event-stream")
 
 # ========== Inicialización final ==========
@@ -574,12 +707,14 @@ video_encoder = None
 video_output = None
 recording = False
 
-log_queue = Queue()
+log_clients = []  # una cola por pestaña: con una sola compartida, las pestañas viejas se quedaban mensajes
 log_lock = Lock()
 
 def log_to_console(msg):
+    line = f"[{time.strftime('%H:%M:%S')}] {msg}"
     with log_lock:
-        log_queue.put(f"[{time.strftime('%H:%M:%S')}] {msg}")
+        for q in log_clients:
+            q.put(line)
 
 if CAMERA_AVAILABLE:
     camera = Picamera2()

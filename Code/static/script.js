@@ -58,12 +58,26 @@ const app = {
     consoleEl.innerHTML = "Connecting...";
     if (this.eventSource) this.eventSource.close();
     this.eventSource = new EventSource("/api/console/stream");
+    this.eventSource.onopen = () => { consoleEl.innerHTML = ""; };
     this.eventSource.onmessage = (e) => {
       const line = document.createElement("div");
       line.textContent = e.data;
       consoleEl.appendChild(line);
       consoleEl.scrollTop = consoleEl.scrollHeight;
     };
+  },
+
+  autoFocus() {
+    this.logLive("Autofocus en marcha (unos segundos)...");
+    fetch("/api/focus/auto")
+      .then(res => res.json())
+      .then(data => {
+        if (data.error) { this.logLive(data.error); return; }
+        this.focus_step = data.step;
+        document.getElementById("focus-value").textContent = data.step;
+        this.logLive(`Autofocus: ${data.step}`);
+      })
+      .catch(err => this.logLive(`Autofocus error: ${err.message}`));
   },
 
   focusMotor(dir) {
@@ -81,6 +95,20 @@ const app = {
       .catch(err => {
         this.logLive(`Focus error: ${err.message}`);
       });
+  },
+
+  captureLayers() {
+    this.logLive("Capturing focus layers (~30 s)...");
+    fetch("/api/capture/layers")
+      .then(res => res.json())
+      .then(data => {
+        if (data.error) { this.logLive(data.error); return; }
+        this.focus_step = data.step;
+        document.getElementById("focus-value").textContent = data.step;
+        this.logLive(`Layers ${data.capas.join(", ")} -> ${data.files.join(", ")}`);
+        if (this.currentView === "samples") this.loadSamples();
+      })
+      .catch(err => this.logLive(`Layers error: ${err.message}`));
   },
 
   capturePhoto() {

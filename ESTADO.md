@@ -89,6 +89,61 @@ conectados**. `gpio=9,13=op,dh,pu` en `config.txt` no basta, porque el firmware 
 próxima versión: **arrancar sin alimentar los motores**. La corrección (resistencia a 3,3 V) va en el próximo HAT.
 Subir al repo el KiCad de la placa montada.
 
+### A4d. Autofoco por software (29/10/2026)
+
+La cámara HQ (IMX477) es de foco manual: libcamera no ofrece `AfMode` ni `LensPosition`. El autofoco lo hace la app
+moviendo el motor de foco (stepper2) y midiendo la nitidez (varianza del laplaciano de la luminancia a 640×480).
+
+Primera prueba en el equipo, versión 1: barrido grueso de 100 pasos y fino de 20, con nitidez a resolución completa.
+- Una vez acabó en el límite inferior (−700).
+- Otra acabó en −200, con el foco a mano en −205.
+- La curva mostró que el pico es muy estrecho: la nitidez vale 5,8 en −200 y ~1,8 a ±20 pasos, con un fondo de ruido
+  de ~1,5. Un barrido de 100 en 100 solo lo encuentra si un punto cae encima por casualidad.
+
+Versión 2 (pasos de 50 por todo el rango, imagen a 1/4): probada 3 veces en el equipo (29/10/2026). Acabó en −200,
+−190 y −190, con el foco a mano en −205. A 1/4 el pico es claro (19–25 frente a un fondo de ~1,5), con un segundo pico
+menor hacia −50. A resolución completa la curva fina sale ruidosa y con dos máximos (−230 y −190/−200). A Alex no le
+gustó el movimiento a tirones.
+
+Versión 3, la actual:
+- Barrido continuo, sin paradas, de todo el rango `focus_min`–`focus_max` a la velocidad normal del foco.
+- Barrido continuo lento (`af_delay_fine` = 0,016 s, ~30 pasos/s) de ±`af_margin` (60) alrededor del mejor punto.
+- Mide la nitidez en cada fotograma de la imagen reducida a 1/4, siempre subiendo.
+- La posición es la de cuando llega el fotograma (unos pasos por detrás en el barrido lento).
+- Probada en el Mac con una cámara simulada: ≤ 5 pasos del pico desde cualquier punto del rango.
+- En el equipo está pendiente (C2 #22).
+
+Versión 3 en el equipo (29/10/2026, otra muestra): el autofoco acabó en −63 y la imagen se ve enfocada.
+
+Precisión (29/10/2026):
+- El pico fino se toma como el centro de los puntos por encima de media altura, no como el máximo, porque a 1/4 la cima
+  es plana y el ruido decide el máximo.
+- La posición anotada es la de cuando se pide el fotograma.
+
+### A4e. Capas de foco del capilar (29/10/2026)
+
+En el capilar hay varios planos con objetos enfocables: en la curva de nitidez se vieron −200 y −50 en la misma muestra.
+
+**Capture Layers** (`/api/capture/layers`) hace lo siguiente:
+- Un barrido continuo de todo el rango.
+- Toma como capas los picos que superan `af_layer_factor` (2) × el fondo y están separados al menos `af_layer_sep`
+  (50) pasos, con un máximo de `af_layer_max` (6).
+- Afina cada capa con un barrido lento de ±`af_layer_window` (25).
+- Saca una foto clasificada por capa, con el mismo número y sufijo `_capa<paso>` (+ `_raw`).
+- Si hay más de una capa, guarda además la imagen apilada (`_apilada`): cada píxel se toma de la capa donde esa zona
+  está más nítida.
+
+Todo es a 640×480. Probado en el Mac con una cámara simulada de dos capas (−205 y −56): las encuentra a ≤ 2 pasos y la
+apilada es más nítida que cada capa.
+
+Primera prueba en el equipo (29/10/2026): encontró 2 capas, en −741 y −618, y guardó la foto 4 con dos capas más la
+apilada. El "4" del nombre es el número de foto, no el número de capas.
+
+Pendiente en el equipo:
+- Comprobar si alguna "capa" es una pared del capilar (polvo o rayas en el vidrio) y no muestra: probar con el capilar
+  vacío o con agua limpia.
+- Comprobar que una misma célula no se cuente en dos capas.
+
 ### A5. Conflicto de entornos (K2.1): mecanismo ya visible en el historial
 
 El 02/12/2025, dentro del venv: `picamera2` instalado con pip → `ModuleNotFoundError: No module named
@@ -199,6 +254,7 @@ Procedimiento:
 | 19 | Óptica: se alcanza el foco dentro de 40–60; capilar entero; espaciador montado | foto | | |
 | 20 | µm por píxel (portaobjetos micrométrico o microesferas), en la resolución completa **y** en la de 640×480 que usa la app | foto de la escala | | |
 | 21 | Píxeles de lado a lado de una célula de *Chlorella* y de una colonia de *Acutodesmus* en la foto que clasifica la app | foto de cultivo | | |
+| 22 | Auto Focus (LED encendido, bomba parada): termina en < 30 s y la imagen queda nítida; repetir 3 veces desde posiciones distintas | botón Auto Focus + consola web | | Probado solo con cámara simulada (29/10/2026) |
 
 ### C3. Lo que falla hoy (rellenar tras C1–C2)
 

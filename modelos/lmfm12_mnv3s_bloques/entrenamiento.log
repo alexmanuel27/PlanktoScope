@@ -1,0 +1,5 @@
+lmfm12_mnv3s_bloques: 12 clases; train 5289, val 1510, test 756
+fuga: 430 de val y 163 de test tienen copia (md5 o dHash <= 5) en train; se excluyen
+preprocesado listo (126 s)
+entrenado (968 s): val_acc congelada 0.836, ajuste fino 0.830 en 4 épocas; se usa el ajuste fino
+test: exactitud 0.777 (0.744-0.808), balanceada 0.792; umbral 0.374; total 984 s → /Users/alex/Nube /repos/PlanktoScope/modelos/lmfm12_mnv3s_bloques

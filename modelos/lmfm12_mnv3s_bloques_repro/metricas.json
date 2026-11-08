@@ -1,0 +1,177 @@
+{
+  "dataset": "/Users/alex/Nube /nube/investigacion/doctorado/Planktoscope/datasets_publicos/LMFM-12/particion_bloques",
+  "clases": [
+    "Closterium gracile",
+    "Coelastrum morus",
+    "Micrasterias crux-melitensis",
+    "Pediastrum duplex",
+    "Planctonema lauterbornii",
+    "Scenedesmus acutus",
+    "Scenedesmus bijuga",
+    "Selenastrum gracile",
+    "Spirogyra majuscula",
+    "Stigeoclonium sp.",
+    "Tetradesmus dimorphus",
+    "Treubaria triappendiculata"
+  ],
+  "imagenes": {
+    "train": {
+      "Closterium gracile": 422,
+      "Coelastrum morus": 443,
+      "Micrasterias crux-melitensis": 399,
+      "Pediastrum duplex": 456,
+      "Planctonema lauterbornii": 470,
+      "Scenedesmus acutus": 462,
+      "Scenedesmus bijuga": 474,
+      "Selenastrum gracile": 450,
+      "Spirogyra majuscula": 455,
+      "Stigeoclonium sp.": 338,
+      "Tetradesmus dimorphus": 464,
+      "Treubaria triappendiculata": 456
+    },
+    "val": {
+      "Closterium gracile": 92,
+      "Coelastrum morus": 101,
+      "Micrasterias crux-melitensis": 112,
+      "Pediastrum duplex": 104,
+      "Planctonema lauterbornii": 61,
+      "Scenedesmus acutus": 108,
+      "Scenedesmus bijuga": 71,
+      "Selenastrum gracile": 65,
+      "Spirogyra majuscula": 128,
+      "Stigeoclonium sp.": 97,
+      "Tetradesmus dimorphus": 104,
+      "Treubaria triappendiculata": 37
+    },
+    "test": {
+      "Closterium gracile": 50,
+      "Coelastrum morus": 38,
+      "Micrasterias crux-melitensis": 53,
+      "Pediastrum duplex": 46,
+      "Planctonema lauterbornii": 61,
+      "Scenedesmus acutus": 63,
+      "Scenedesmus bijuga": 52,
+      "Selenastrum gracile": 31,
+      "Spirogyra majuscula": 65,
+      "Stigeoclonium sp.": 48,
+      "Tetradesmus dimorphus": 65,
+      "Treubaria triappendiculata": 21
+    }
+  },
+  "fugas": {
+    "val": {
+      "excluidas": 430,
+      "de": 1510
+    },
+    "test": {
+      "excluidas": 163,
+      "de": 756
+    }
+  },
+  "test": {
+    "n": 593,
+    "exactitud": 0.8128161888701517,
+    "exactitud_ic95": [
+      0.7790893760539629,
+      0.8448566610455311
+    ],
+    "exactitud_balanceada": 0.8169485108966948,
+    "por_clase": {
+      "Closterium gracile": {
+        "precision": 0.875,
+        "recall": 0.98,
+        "f1-score": 0.9245,
+        "support": 50.0
+      },
+      "Coelastrum morus": {
+        "precision": 0.6,
+        "recall": 0.3947,
+        "f1-score": 0.4762,
+        "support": 38.0
+      },
+      "Micrasterias crux-melitensis": {
+        "precision": 0.9184,
+        "recall": 0.8491,
+        "f1-score": 0.8824,
+        "support": 53.0
+      },
+      "Pediastrum duplex": {
+        "precision": 0.9024,
+        "recall": 0.8043,
+        "f1-score": 0.8506,
+        "support": 46.0
+      },
+      "Planctonema lauterbornii": {
+        "precision": 0.9574,
+        "recall": 0.7377,
+        "f1-score": 0.8333,
+        "support": 61.0
+      },
+      "Scenedesmus acutus": {
+        "precision": 0.8125,
+        "recall": 0.4127,
+        "f1-score": 0.5474,
+        "support": 63.0
+      },
+      "Scenedesmus bijuga": {
+        "precision": 0.6667,
+        "recall": 0.8462,
+        "f1-score": 0.7458,
+        "support": 52.0
+      },
+      "Selenastrum gracile": {
+        "precision": 0.9655,
+        "recall": 0.9032,
+        "f1-score": 0.9333,
+        "support": 31.0
+      },
+      "Spirogyra majuscula": {
+        "precision": 0.9155,
+        "recall": 1.0,
+        "f1-score": 0.9559,
+        "support": 65.0
+      },
+      "Stigeoclonium sp.": {
+        "precision": 0.8136,
+        "recall": 1.0,
+        "f1-score": 0.8972,
+        "support": 48.0
+      },
+      "Tetradesmus dimorphus": {
+        "precision": 0.8333,
+        "recall": 0.9231,
+        "f1-score": 0.8759,
+        "support": 65.0
+      },
+      "Treubaria triappendiculata": {
+        "precision": 0.4348,
+        "recall": 0.9524,
+        "f1-score": 0.597,
+        "support": 21.0
+      }
+    }
+  },
+  "umbral_confianza": {
+    "valor": 0.4266032874584198,
+    "criterio": "cuantil 5 % de la confianza máxima en validación",
+    "test_conservadas": 0.9477234401349073,
+    "test_exactitud_conservadas": 0.8309608540925267
+  },
+  "tflite": {
+    "md5": "c6da04c20ee4054ed69088cd738fdccf",
+    "bytes": 1115856,
+    "ms_por_imagen_mac": 2.8
+  },
+  "entrenamiento": {
+    "base": "MobileNetV3Small ImageNet",
+    "val_acc_cabeza": 0.8333333134651184,
+    "val_acc_ajuste": 0.8740741014480591,
+    "ajuste_usado": true,
+    "lr_ajuste": 1e-05,
+    "epocas_cabeza": 5,
+    "epocas_ajuste_max": 20,
+    "epocas_ajuste_hechas": 7,
+    "batch": 32,
+    "rapido": false
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "n": 81,
+  "preprocesado": {
+    "entrenamiento (nearest)": {
+      "exactitud": 0.8395061728395061
+    },
+    "app (PIL bicúbica)": {
+      "exactitud": 0.7407407407407407
+    }
+  },
+  "umbral_msp": {
+    "recall_objetivo": 0.95,
+    "umbral": 0.549461841583252,
+    "conservadas": 77,
+    "rechazadas": 4,
+    "fallos_total": 13,
+    "fallos_rechazados": 2,
+    "exactitud_conservadas": 0.8571428571428571
+  },
+  "temperatura": {
+    "T": 1.8,
+    "nll_antes": 0.584171712398529,
+    "nll_despues": 0.47477537393569946,
+    "ece_antes": 0.10392925069655906,
+    "ece_despues": 0.10527455438802269,
+    "umbral_msp_con_T": 0.40975067019462585
+  }
+}

@@ -17,6 +17,10 @@
     <a href="#" onclick="app.showView('samples')">Samples</a>
     <a href="#" onclick="app.showView('live')">Live View</a>
     <a href="#" onclick="app.showView('settings')">Settings</a>
+    <div id="disk" title="SD card">
+      <div class="disk-bar"><i id="disk-fill"></i></div>
+      <span id="disk-text">SD —</span>
+    </div>
   </nav>
 
   <main>
@@ -25,6 +29,7 @@
       <h1>Sample Library</h1>
       <div class="btn-group">
         <a href="/download/all" class="btn">Download All</a>
+        <a href="/download/ecotaxa" class="btn" title="Recortes + TSV para importar en EcoTaxa">Download EcoTaxa</a>
         <button class="btn btn-danger" onclick="app.deleteAllSamples()">Delete All</button>
       </div>
       <table>
@@ -54,6 +59,8 @@
     <!-- Live View -->
     <div id="view-live" class="view">
       <h1>Live View</h1>
+      <div class="live-layout">
+      <div class="live-main">
       <div style="text-align: center;">
         <img src="/video_feed" alt="Live Stream" class="video-feed">
         <div class="focus-controls">
@@ -71,9 +78,59 @@
       <div class="btn-group live-buttons">
         <button class="btn" onclick="app.capturePhoto()">Capture Photo</button>
         <button class="btn" onclick="app.captureLayers()">Capture Layers</button>
+        <button class="btn" onclick="app.captureBackground()">Background</button>
         <button class="btn" id="videoBtn" onclick="app.toggleVideo()">Start Video</button>
         <button class="btn take-sample" onclick="app.takeSample()">Take Sample</button>
         <button class="btn" id="ledBtn" onclick="app.toggleLed()">LED ON</button>
+      </div>
+      </div>
+
+      <div class="side-col">
+      <!-- Sesión del dataset (datos/PROTOCOLO_DATASET.md): un cultivo o una muestra, un día -->
+      <aside class="series-panel" id="session-panel">
+        <h2>Session</h2>
+        <label class="series-field">Species / culture
+          <input list="session-species" id="session-especie" placeholder="chlorella_vulgaris">
+          <datalist id="session-species">
+            <option value="chlorella_vulgaris"><option value="acutodesmus_obliquus"><option value="lago"><option value="mezcla">
+          </datalist>
+        </label>
+        <label class="series-field">Origin
+          <select id="session-origen"><option value="cultivo">culture</option><option value="lago">lake</option><option value="otro">other</option></select>
+        </label>
+        <div class="series-row">
+          <label class="series-field">Dilution <input id="session-dilucion" placeholder="1:10"></label>
+          <label class="series-field">Age (days) <input type="number" id="session-edad" min="0"></label>
+        </div>
+        <label class="series-field">Operator <input id="session-operador"></label>
+        <label class="series-field">Notes <input id="session-notas"></label>
+        <div class="btn-group">
+          <button class="btn" id="session-start" onclick="app.startSession()">Start session</button>
+          <button class="btn btn-danger" id="session-end" onclick="app.endSession()">End session</button>
+        </div>
+        <div id="session-status" class="series-status">No session</div>
+      </aside>
+
+      <!-- Serie temporal: bomba + Capture Layers cada intervalo -->
+      <aside class="series-panel">
+        <h2>Time Series</h2>
+        <div class="series-field">
+          <label><input type="radio" name="series-mode" value="tiempo" checked> Total time (s)</label>
+          <label><input type="radio" name="series-mode" value="muestras"> Number of samples</label>
+          <input type="number" id="series-value" value="600" min="1">
+        </div>
+        <label class="series-field">Interval (s) <input type="number" id="series-interval" value="60" min="1"></label>
+        <label class="series-field">Wait after pump (s) <input type="number" id="series-wait" value="5" min="0"></label>
+        <div id="series-summary" class="series-summary"></div>
+        <div class="btn-group">
+          <button class="btn" id="series-start" onclick="app.startSeries()">Start</button>
+          <button class="btn btn-danger" onclick="app.stopSeries()">Stop</button>
+        </div>
+        <div id="series-status" class="series-status">No series running</div>
+        <canvas id="series-chart" width="300" height="200"></canvas>
+        <div id="series-legend" class="series-legend"></div>
+      </aside>
+      </div>
       </div>
       <h2>Live Console</h2>
       <div id="live-console" class="console">Awaiting commands...</div>
@@ -103,6 +160,19 @@
 
       <button class="btn" onclick="app.saveConfig()">Save Configuration</button>
       <div id="config-status" style="margin-top: 10px; color: green;"></div>
+
+      <h2>Calibration (volume and concentration)</h2>
+      <div class="config-group">
+        <p id="calib-resumen" style="margin: 0 0 10px;"></p>
+        <label>µm per pixel (640×480): <input type="text" id="calib-umpx" disabled>
+          <small>set it from a micrometer-slide photo in Samples → Calibrate</small></label>
+        <label>Capillary inner depth (µm): <input type="number" id="calib-prof" min="1" step="any">
+          <button class="btn" onclick="app.saveDepth()">Save</button></label>
+        <label>Pump: steps pumped <input type="number" id="calib-pasos" min="1">
+          measured volume (mL) <input type="number" id="calib-ml" min="0" step="any">
+          <button class="btn" onclick="app.savePump()">Save</button>
+          <small>e.g. press Take Sample 10 times and measure the liquid in a graduated cylinder</small></label>
+      </div>
     </div>
   </main>
 </div>

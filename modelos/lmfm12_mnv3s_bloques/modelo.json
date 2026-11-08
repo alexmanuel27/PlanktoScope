@@ -1,0 +1,21 @@
+{
+  "clases": [
+    "Closterium gracile",
+    "Coelastrum morus",
+    "Micrasterias crux-melitensis",
+    "Pediastrum duplex",
+    "Planctonema lauterbornii",
+    "Scenedesmus acutus",
+    "Scenedesmus bijuga",
+    "Selenastrum gracile",
+    "Spirogyra majuscula",
+    "Stigeoclonium sp.",
+    "Tetradesmus dimorphus",
+    "Treubaria triappendiculata"
+  ],
+  "lado": 224,
+  "preprocesado": "a_cuadrado",
+  "escala": "0-255",
+  "umbral_msp": 0.37386560440063477,
+  "arquitectura": "MobileNetV3Small"
+}

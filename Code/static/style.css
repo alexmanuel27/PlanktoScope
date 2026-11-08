@@ -206,3 +206,35 @@ tr:hover { background: #f1f5f9; }
 #viewer { display: none; position: fixed; inset: 0; z-index: 1000; background: rgba(0, 0, 0, .88);
           align-items: center; justify-content: center; cursor: zoom-out; }
 #viewer img, #viewer video { max-width: 96vw; max-height: 96vh; cursor: default; }
+.viewer-box { position: relative; display: flex; flex-direction: column; align-items: center; }
+.viewer-box img { max-height: 88vh; }
+.viewer-bar { margin-top: 8px; color: #fff; display: flex; gap: 12px; align-items: center; }
+.calib-dot { position: absolute; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 50%;
+             background: #ff2d55; pointer-events: none; }
+
+/* Serie temporal en la franja derecha de Live View */
+.live-layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 20px; align-items: start; }
+@media (max-width: 1100px) { .live-layout { grid-template-columns: 1fr; } }
+.series-panel { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px; }
+.series-panel h2 { margin: 0 0 10px; font-size: 1.1rem; }
+.series-field { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; font-size: .9rem; }
+.series-field input[type=number] { padding: 6px; border: 1px solid #d1d5db; border-radius: 4px; }
+.series-summary { font-size: .85rem; color: #374151; margin-bottom: 10px; }
+.series-status { font-size: .85rem; margin: 10px 0; color: #111827; }
+#series-chart { width: 100%; height: auto; border: 1px solid #f3f4f6; }
+.series-legend { display: flex; flex-wrap: wrap; gap: 8px; font-size: .8rem; margin-top: 6px; }
+.series-legend i { display: inline-block; width: 10px; height: 10px; margin-right: 4px; border-radius: 2px; }
+.series-panel .btn:disabled { opacity: .5; cursor: not-allowed; }
+
+/* Capacidad de la SD, esquina inferior de la barra lateral */
+#disk { position: absolute; left: 20px; right: 20px; bottom: 20px; font-size: .75rem; color: #94a3b8; }
+.disk-bar { height: 8px; background: #334155; border-radius: 4px; overflow: hidden; margin-bottom: 4px; }
+#disk-fill { display: block; height: 100%; width: 0; background: #38bdf8; transition: width .5s; }
+#disk-fill.casi { background: #f59e0b; }
+#disk-fill.lleno { background: #ef4444; }
+
+/* Columna derecha: sesión + serie */
+.side-col { display: flex; flex-direction: column; gap: 16px; }
+.series-row { display: flex; gap: 8px; }
+.series-row .series-field { flex: 1; }
+.series-field input:not([type=radio]), .series-field select { padding: 6px; border: 1px solid #d1d5db; border-radius: 4px; }

@@ -15,3 +15,6 @@ config.json
 focus_state.json
 counter.json
 *.tmp
+
+# Fondo (foto en blanco) de cada equipo
+fondo.png

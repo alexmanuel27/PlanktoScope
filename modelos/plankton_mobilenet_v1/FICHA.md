@@ -46,6 +46,23 @@
 2. **Posible fuga residual.** El umbral de dHash es heurístico. La casi-copia más cercana que se aceptó está a 6 bits, y los nombres de fichero (`<clase>_<n>`) sugieren que varias imágenes pueden salir del mismo espécimen o del mismo campo. Si lo son, 0,84 está inflado.
 3. **Sin comportamiento ante taxones ajenos.** No hay clase "otro" ni evaluación con organismos fuera de las 19 clases.
 
+## Calibración (01/11/2026, `src/ml/calibrar_umbral.py` → `calibracion_2026-11-01/`)
+
+Medido sobre el mismo subconjunto limpio (n = 81).
+
+- **Preprocesado de la app equivocado:** la app redimensionaba con la bicúbica por defecto de PIL, y el entrenamiento
+  usó *nearest*. La exactitud era 0,74 con la de la app frente a 0,84 con la del entrenamiento.
+  - Corregido en `Code/ml/classifier.py`: con el código de la app ya da 0,8395, la misma cifra que la auditoría.
+- **Umbral de confianza máxima con el 95 % de recall de las clases conocidas:** 0,549.
+  - Rechaza 4 imágenes: 2 de los 13 fallos y 2 aciertos.
+  - La exactitud de las conservadas pasa de 0,84 a 0,857.
+  - La app usa 55 % (`camara.confianza_min`).
+- **Temperature scaling:** T = 1,8 baja el NLL (de 0,584 a 0,475) pero no mejora el ECE (0,104 → 0,105). No se aplica.
+- **Fuera de dominio, en el equipo:** en `objetos_6.csv` (29/10/2026, preprocesado bicúbico anterior), los 6 objetos
+  nítidos recibieron entre 68 % y 99 % de confianza para géneros marinos. Ninguno lo rechazaría el umbral de 55 %.
+  El umbral no protege frente a lo que el modelo no conoce. Por eso la app muestra "objeto" por defecto
+  (`camara.mostrar_especie = false`) y deja la clase del modelo solo en el CSV.
+
 ## Veredicto
 
 No se puede usar como resultado del artículo. Además, las clases (marinas) no son las del estudio (especies de cultivo compradas + lago de agua dulce). Sirve como línea base del *pipeline* de entrenamiento, no como clasificador del instrumento.

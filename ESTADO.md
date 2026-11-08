@@ -139,10 +139,219 @@ apilada es más nítida que cada capa.
 Primera prueba en el equipo (29/10/2026): encontró 2 capas, en −741 y −618, y guardó la foto 4 con dos capas más la
 apilada. El "4" del nombre es el número de foto, no el número de capas.
 
+Repetidas entre capas (29/10/2026, sin probar en el equipo):
+- Se juntan los objetos de todas las capas. Si el centro de la caja de uno cae dentro de la caja de otro de otra capa,
+  se cuentan como el mismo objeto y se queda el recorte más nítido (varianza del laplaciano).
+- Resultado: `objetos_<n>.csv` (capa, caja, clase, confianza, nitidez) y en la consola "N en las capas, M sin repetidas"
+  más el conteo por clase.
+- Las fotos anotadas de cada capa siguen mostrando todos sus objetos, y la apilada no entra en el conteo.
+
+Capas falsas: en la simulación, la ladera de un pico ancho salía como capa. Arreglado: un punto solo cuenta como capa si
+es el máximo en ±`af_layer_sep`/2, y dos capas que al afinar quedan a menos de `af_layer_sep`/2 se juntan.
+
+Foco por zonas (29/10/2026):
+- **Fallo visto en el equipo:** Capture Layers encontró una sola capa (−563). Ahí estaba enfocada una partícula grande
+  y oscura, mientras que las algas del centro quedaban borrosas. Alex las enfocó a mano en −533.
+- **Causa:** la nitidez de toda la imagen la domina el objeto más grande y contrastado. Además, con `af_layer_sep` = 50,
+  dos planos a 30 pasos se juntaban en uno.
+- **Arreglo:**
+  - La nitidez se mide en 4×4 zonas. Cada zona vota por su posición más nítida, si supera 2 × su propio fondo.
+  - Los votos a menos de `af_layer_sep` (ahora 20) pasos forman una capa, y cada capa se afina solo con sus zonas.
+  - Auto Focus va a la capa con más zonas, es decir, donde se enfoca la mayor parte de la imagen.
+- **Prueba en el Mac:** con el caso reproducido (partícula en una zona a −563, algas repartidas a −533), Auto Focus
+  acaba en −532 y Capture Layers encuentra −563 y −533. Con dos mitades a −205 y −56 encuentra las dos, y con una sola
+  capa encuentra una.
+- En el equipo está pendiente.
+- **Varias profundidades en una misma zona:** cada zona puede votar por varios picos de su curva. Cada uno tiene que ser
+  el máximo en ±10 pasos, estar a 20 pasos o más de los otros y tener entre ellos un valle por debajo de media altura.
+  Probado en el Mac con dos profundidades (−205 y −56) presentes en las 16 zonas: encuentra las dos. Con una sola capa
+  no aparecen capas falsas.
+
 Pendiente en el equipo:
 - Comprobar si alguna "capa" es una pared del capilar (polvo o rayas en el vidrio) y no muestra: probar con el capilar
   vacío o con agua limpia.
-- Comprobar que una misma célula no se cuente en dos capas.
+- Comprobar en `objetos_<n>.csv`, comparando con las fotos de cada capa, que las repetidas que quita son de verdad la misma célula.
+
+### A4f. Mejoras tomadas del PlanktoScope original (30/10/2026, sin probar en el equipo)
+
+**Motor de foco.** Alex comprobó que ni pierde pasos ni tiene holgura, pero pidió bajar la velocidad y poner una rampa
+corta. Valores nuevos: `delay` de 0,002 a 0,003 s, `ramp_steps` = 20 y `delay_start` = 0,006 s. Se cambian en el
+`config.json` de la Raspberry. Corregido además un fallo: la rampa arrancaba más rápido que el crucero en el barrido fino
+lento; ahora nunca empieza por debajo del crucero.
+
+**1. Campo plano.**
+- Antes de detectar, cada foto se divide entre un fondo y se reescala.
+- El fondo es la foto en blanco que guarda el botón **Background** (mediana de 10 fotogramas con agua limpia, en
+  `Code/fondo.png`). Si no hay foto en blanco, se estima el fondo de la propia foto con una mediana grande a 1/8.
+- La clasificación sigue usando el recorte original, porque el modelo se entrenó sin esta corrección.
+- No se implementa la mediana de 10 fotos de muestra ni el descarte de objetos fijos entre fotogramas: necesitan que la
+  muestra se mueva entre fotos, y eso llega con la adquisición en ciclos (mejora 4, más adelante).
+
+**2. Medidas por objeto.** `objetos_<n>.csv` (también en Capture Photo) incluye ahora área, diámetro equivalente, ejes
+mayor y menor, alargamiento, circularidad, solidez, y media y desviación de tono, saturación y brillo. Son las medidas del
+segmentador del PlanktoScope, en px y, si hay calibración, en µm.
+
+**3. Tamaño en µm.**
+- `config.json` → `camara.um_por_px` (0 = sin calibrar), `tamano_min_um` (3) y `tamano_max_um` (300).
+- Con calibración, el detector filtra por diámetro equivalente en µm; sin ella, usa los límites de área de siempre.
+- La calibración se hace en el visor de Samples: foto del portaobjetos micrométrico, **Calibrate**, clic en dos marcas y
+  la distancia real. Vale para las fotos de 640×480 de la app.
+
+**Pruebas en el Mac:**
+- Cámara simulada: las medidas, el CSV, la calibración, el filtro en µm, Background y su borrado funcionan. Guardar los
+  ajustes desde la web conserva la sección `camara`.
+- Las pruebas de capas y autofoco siguen pasando.
+- Con las tres fotos de `imagenes_prueba_locales` (no son de este equipo), el detector con campo plano estimado encuentra
+  casi los mismos objetos que sin él: 65/63, 95/96 y 87/87.
+
+**Umbrales para no clasificar lo que no se ve (30/10/2026):**
+- Si la nitidez del recorte (varianza del laplaciano de la foto original) es menor que `camara.nitidez_min` (15), el
+  objeto queda como `descartado`: no se clasifica, no se dibuja ni se cuenta, y sí sale en el CSV para revisar el umbral.
+- Si la confianza del clasificador es menor que `camara.confianza_min` (50 %), la etiqueta es `desconocido`.
+- De dónde sale el 15: en `objetos_6` los objetos reales tenían 33–66 y las manchas 2,6–13,8; en `objetos_8` (pasada
+  sin nada enfocado) las dos manchas tenían 4,9 y 6,2. Las manchas tenían confianza 37–44 % y los reales 68–99 %.
+- Probado en el Mac: una foto desenfocada queda con todo descartado, sin foto anotada y "No objects classified"; con
+  confianza 38 % sale `desconocido` y con 88 % la especie.
+
+Pendiente en el equipo:
+- Tomar el fondo con agua limpia.
+- Calibrar con el portaobjetos.
+- Revisar que el campo plano no empeora la detección en las fotos reales.
+
+### A4g. Series temporales (30/10/2026, sin probar en el equipo)
+
+**Panel Time Series** en la franja derecha de Live View:
+- Duración por tiempo total (s) o por número de muestras, intervalo (s) y espera tras bombear (5 s por defecto). Antes
+  de empezar muestra cuántas muestras salen y cuánto dura.
+- En cada muestra: bomba, espera y Capture Layers con conteo sin repetidas.
+- Lo lleva un hilo en la Raspberry (`/api/series/start|stop|state`), así que sigue aunque se cierre el navegador. El
+  panel consulta el estado cada 3 s y dibuja el conteo por clase en el tiempo con un canvas propio, sin librerías.
+- Mientras dura la serie se rechazan con 409 la bomba, el foco, las capturas, Background y el LED.
+- Resultado: `serie_<n>.csv` con una fila por muestra (muestra, hora, t_s, retraso_s, foto, capas, objetos,
+  descartados y una columna por clase). Se reescribe tras cada muestra.
+- Si el intervalo es menor que una muestra (~40 s), avisa antes de empezar y las muestras van seguidas; `retraso_s`
+  lo deja anotado.
+
+**LED y SD (30/10/2026):**
+- Start enciende el LED, que se apaga entre muestras, se enciende solo durante cada muestra y se apaga al terminar o
+  parar. El botón LED del panel se actualiza solo.
+- En la esquina inferior de la barra lateral hay una barra con el espacio de la SD (`/api/disk`, cada 30 s): azul,
+  ámbar por encima del 80 % y roja por encima del 90 %.
+- Probado en el Mac: el LED queda apagado en la espera entre muestras y al final.
+- Aviso de fin de serie: al terminar, el LED parpadea despacio (0,5 s encendido / 1,5 s apagado). Si la serie se cortó
+  por un error, parpadea rápido (0,15 / 0,15). Con Stop no parpadea. Se apaga con el botón LED, con Start o con
+  cualquier captura, bomba o movimiento de foco; el panel lo indica. Encendido directo, sin rampa PWM. Probado en el Mac
+  (patrón lento, apagado con el botón, sin parpadeo con Stop, patrón rápido con error y apagado al capturar).
+
+**Probado en el Mac con la cámara simulada:**
+- Validaciones: LED apagado, valores no válidos y serie ya en marcha.
+- Bloqueo de la bomba, la foto y el foco durante la serie, y desbloqueo al terminar.
+- Serie de 2 muestras completa con su CSV, y parada a mitad.
+- Captura del panel renderizado: el diseño y la gráfica se ven bien.
+
+### A4h. Clasificador: preprocesado corregido y etiquetas honestas (01/11/2026)
+
+- Medido en `modelos/plankton_mobilenet_v1/calibracion_2026-11-01/` (ver FICHA): la app perdía 10 puntos de exactitud
+  por redimensionar distinto que en el entrenamiento. Corregido; con el código de la app el resultado vuelve a 0,84.
+- `camara.confianza_min` pasa de 50 a 55, el umbral calibrado.
+- `camara.mostrar_especie = false` por defecto:
+  - La foto anotada, el conteo y la serie dicen "objeto", con el diámetro en µm si hay calibración.
+  - La clase y la confianza del modelo quedan en el CSV (`clase_modelo`, `confianza_modelo`) como dato experimental.
+  - Con `true` vuelve a mostrar la especie, o `desconocido` por debajo del umbral.
+- Probado en el Mac con la cámara simulada.
+
+### A4i. Recortes a resolución completa (02/11/2026, sin probar en el equipo)
+
+- **Dos tamaños del mismo fotograma:** la cámara trabaja con `main` = 2028×1520 RGB888 (sensor completo con binning 2×2,
+  forzado con `sensor.output_size`) y `lores` = 640×480. Las dos salen de la misma petición (`capture_request`), así
+  que ven el mismo campo.
+- **Detección:** sigue en la de 640×480.
+- **Con cada foto (Capture Photo, cada capa y la apilada) se guarda además `<nombre>_full.jpg`** (2028×1520, calidad 95).
+- **Recortes:** un PNG por objeto, también los `descartado` (sirven para la clase "no alga/borroso"), en
+  `samples/recortes/<n><sufijo>_<i>.png`, sacado de la foto completa con un margen del 10 % (mínimo 4 px de 640). El
+  CSV indica el recorte de cada objeto en la columna `recorte`. La apilada no genera recortes (serían repetidos).
+- **Download All y Delete All** incluyen `recortes/`.
+- **Config:** `camara.foto_completa` = [2028, 1520]; [0, 0] la desactiva. Si la cámara no acepta la configuración, la
+  app vuelve sola a solo 640×480 y lo dice en la consola.
+- **Calibración:** `um_por_px` sigue siendo de la imagen de 640×480. En la completa, µm/px = `um_por_px` × 640/2028.
+- **Pruebas:** con cámara simulada. Las pruebas pasan a `pruebas/` (falsos de RPi.GPIO y picamera2 + 8 pruebas) y se
+  corren con `pruebas/correr.sh`.
+
+### A4j. Preparación del dataset propio (02/11/2026)
+
+- **Download EcoTaxa** (Samples, `/download/ecotaxa`) genera un zip con todos los recortes y `ecotaxa_planktoscope.tsv`:
+  cabecera, fila de tipos [t]/[f] y una fila por objeto con las medidas, la etiqueta de la app, la clase del modelo
+  (columna informativa, sin anotación), `sample_id` = foto y µm/px del recorte. Probado en el Mac
+  (`pruebas/test_ecotaxa.py`). Falta comprobar la importación en un proyecto real de EcoTaxa.
+- **`datos/PROTOCOLO_DATASET.md`:** clases v1, captura (una sesión = un cultivo y un día; ≥ 5 sesiones y ≥ 300
+  recortes por clase), metadatos en `datos/sesiones.csv`, etiquetado (EcoTaxa o carpetas), particiones **por sesión**
+  y evaluación (por clase, por conteos y con objetos desconocidos del lago).
+
+### A4k. Pipeline de entrenamiento (02/11/2026)
+
+- **`src/ml/entrenar.py`:** dataset con `train/val/test/<clase>/` → modelo en `modelos/<nombre>/`. Pasos:
+  1. Comprobación de fuga (md5 + dHash): excluye de val y test las imágenes con copia en train.
+  2. Preprocesado común con la app (`Code/ml/preprocesado.a_cuadrado`: completa a cuadrado con el color del borde, sin
+     deformar).
+  3. MobileNetV3 Small (por defecto) o Large de ImageNet, primero con la base congelada y luego con ajuste fino y parada
+     temprana. Si el ajuste no mejora la validación, se queda la fase congelada. Aumento con giros, volteos, zoom,
+     brillo y contraste, y pesos por clase.
+  4. TFLite con cuantización de rango dinámico.
+  5. Evaluación **del TFLite**: exactitud y exactitud balanceada con IC95 % por bootstrap, métricas por clase, matriz de
+     confusión y umbral de confianza al 95 % de recall en val.
+  6. `FICHA.md` generada, con una sección "lo que NO dicen" para rellenar a mano.
+- **`src/ml/particionar.py`:** particiones por bloques consecutivos dentro de cada clase y grupo de nombre, para cuando
+  el dataset no indica sesiones. El reparto aleatorio no se usa nunca.
+- **La app acepta el formato nuevo:** si existe `Code/ml/modelo.json` (+ `modelo.tflite`), `classifier.py` usa sus
+  clases y su preprocesado, y clasifica el recorte de la foto completa. Si no existe, sigue el modelo antiguo como hasta
+  ahora.
+- **Ensayo con LMFM-12** (CC-BY-4.0, 7.555 imágenes, 12 algas verdes de agua dulce, md5 del zip
+  `fdbe0e210bc806cae517f491f0d89f5f`), en `doctorado/Planktoscope/datasets_publicos/LMFM-12/`. Resultado en
+  `modelos/lmfm12_mnv3s_bloques/`.
+- **Incidente (02/11/2026):** una segunda ejecución de la misma tarea sobrescribió por error `src/ml/entrenar.py` y
+  `Code/ml/preprocesado.py` de la primera.
+  - `preprocesado.py` se restauró desde su `.pyc`, con bytecode idéntico al original.
+  - `entrenar.py` no se pudo recuperar. El actual lo reimplementa con las mismas convenciones (a_cuadrado, exclusión de
+    fugas, lr de ajuste 1e-5, `modelo.json`), pero sin la opción EfficientNetB0.
+  - Para comprobar que reproduce el resultado, se reentrenó `lmfm12_mnv3s_bloques_repro` con los mismos datos: test
+    0,813 (IC95 % 0,779–0,845) frente a 0,777 (0,744–0,808). Los intervalos se solapan; en esta ejecución el ajuste fino
+    duró más.
+- **Foco por zonas, corrección:** al afinar una capa se usa la mediana de sus zonas, no la media. Si la zona de un
+  objeto grande había votado también por la capa de las algas, la media arrastraba el foco 12 pasos hacia el objeto.
+  `pruebas/test_zonas.py` usa ahora la velocidad de motor del equipo, porque con la rápida el barrido de la simulación
+  no separaba planos a 30 pasos.
+
+### A4l. Sesiones, fondo de la serie, volumen y punto de partida LMFM-12 (02/11/2026, sin probar en el equipo)
+
+1. **Sesión del dataset** (panel *Session*, encima de Time Series).
+   - Campos: especie o cultivo, origen, dilución, edad, operador y notas.
+   - *Start* guarda la sesión abierta en `samples/sesion_actual.json` (sobrevive a un reinicio) con la primera foto.
+     *End* añade la fila a `samples/sesiones.csv`, con las mismas columnas que `datos/sesiones.csv`: fotos
+     desde–hasta, series, µm/px y `particion` vacía.
+   - Cada objeto lleva la columna `sesion` en `objetos_<n>.csv` y en las series. En EcoTaxa, `sample_id` = sesión.
+   - Durante una serie no se abren ni cierran sesiones.
+   - **Cambio:** *Delete All* ya no pone los contadores a 0 ni borra `sesiones.csv`. Si no, dos fotos distintas
+     tendrían el mismo número y el registro de sesiones apuntaría a la equivocada.
+2. **Fondo y objetos fijos en las series** (como el segmentador del PlanktoScope, que necesita que la muestra cambie
+   entre fotos, y en Time Series la bomba la cambia):
+   - Fondo = mediana de las últimas 10 fotos de la serie, en cuanto hay 5.
+   - Un objeto en el mismo sitio en 2 de las 3 muestras anteriores queda como `fijo` (suciedad o algo pegado al
+     capilar): no se cuenta y sí queda en el CSV.
+   - En la simulación, la suciedad sale `fija` desde la 3.ª muestra. Desde la 6.ª, la mediana ya la absorbe y ni se
+     detecta.
+   - El CSV de la serie añade la columna `fijos`.
+3. **Volumen y concentración.**
+   - Settings → *Calibration*: grosor interior del capilar (µm) y calibración de la bomba (pasos dados y mL medidos →
+     `stepper1.pasos_por_ml`).
+   - Volumen por foto = (640 × µm/px) × (480 × µm/px) × grosor.
+   - El CSV de la serie añade `volumen_ml`, `volumen_bombeado_ml`, `total_por_ml` y `<clase>_por_ml`.
+   - Al empezar la serie, avisa si cada muestra bombea menos volumen del que fotografía, porque entonces las muestras
+     se solapan.
+4. **`entrenar.py --pesos-iniciales modelo.keras`:** reutiliza la base ya ajustada de otro modelo (p. ej. LMFM-12)
+   con una cabeza nueva. Probado con una ejecución rápida.
+
+**Pruebas nuevas:** `pruebas/test_sesion.py`, `test_fijos.py` y `test_volumen.py`. `correr.sh` no puede ejecutarse dos
+veces a la vez, porque las dos copias comparten `/tmp/ptest`.
 
 ### A5. Conflicto de entornos (K2.1): mecanismo ya visible en el historial
 

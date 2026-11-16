@@ -18,3 +18,9 @@ counter.json
 
 # Fondo (foto en blanco) de cada equipo
 fondo.png
+
+# Fotos que guarda "prueba de foco/camara_web.py" en la Pi
+capturas/
+
+# Bloqueos de KiCad
+*.lck

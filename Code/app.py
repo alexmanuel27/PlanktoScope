@@ -674,6 +674,30 @@ if CAMERA_AVAILABLE:
                     "saturacion_media", "saturacion_std", "brillo_media", "brillo_std",
                     "area_um2", "diametro_eq_um", "eje_mayor_um", "eje_menor_um"]
 
+    def quitar_fijo_atrasado(foto, b):
+        """Un objeto contado en una muestra anterior resulta estar pegado al capilar: se pasa a «fijo» en su fila de la
+        serie y en su objetos_<foto>.csv. Solo llega a las últimas muestras que guarda cajas_serie (memoria acotada)."""
+        clase, b["label"] = b["label"], "fijo"
+        for fila in serie["filas"]:
+            if fila["foto"] == foto:
+                fila["objetos"] -= 1
+                fila["fijos"] += 1
+                fila["conteo"][clase] = fila["conteo"].get(clase, 1) - 1
+                if fila["conteo"][clase] <= 0:
+                    del fila["conteo"][clase]
+        ruta = os.path.join(SAMPLES_DIR, f"objetos_{foto}.csv")
+        if os.path.exists(ruta):
+            with open(ruta, newline="") as f:
+                filas = list(csv.DictReader(f))
+            for r in filas:
+                if [r["capa"], r["x"], r["y"], r["w"], r["h"]] == [str(b[k]) for k in ("capa", "x", "y", "w", "h")]:
+                    r["label"] = "fijo"
+            with open(ruta, "w", newline="") as f:
+                w_csv = csv.DictWriter(f, fieldnames=CAMPOS_TABLA, extrasaction="ignore", restval="")
+                w_csv.writeheader()
+                w_csv.writerows(filas)
+        log_to_console(f"Fijo también en la foto {foto} ({clase} en x={b['x']}, y={b['y']}): descontado")
+
     def guardar_tabla(numero, objetos):
         """objetos_<n>.csv: un objeto por fila con caja, clase y medidas (las de µm vacías si no hay calibración)."""
         nombre = f"objetos_{numero}.csv"
@@ -780,9 +804,14 @@ if CAMERA_AVAILABLE:
         fijos = 0
         if en_serie:
             for o in unicos:
-                if sum(any(mismo_lugar(o, b) for b in cajas) for cajas in cajas_serie) >= config["camara"].get("fijo_muestras", 2):
+                if sum(any(mismo_lugar(o, b) for b in e["cajas"]) for e in cajas_serie) >= config["camara"].get("fijo_muestras", 2):
                     o["label"], fijos = "fijo", fijos + 1   # no se mueve al bombear: no es muestra nueva
-            cajas_serie.append([{k: o[k] for k in ("x", "y", "w", "h")} for o in unicos])
+                    for e in cajas_serie:                   # y en las muestras anteriores, donde aún se contó como objeto
+                        for b in e["cajas"]:
+                            if b["label"] not in ("fijo", "descartado") and mismo_lugar(o, b):
+                                quitar_fijo_atrasado(e["foto"], b)
+            cajas_serie.append({"foto": counter["photo"],
+                                "cajas": [{k: o[k] for k in ("x", "y", "w", "h", "label", "capa")} for o in unicos]})
             fondo_serie.extend(fotos)
         ficheros.append(guardar_tabla(counter["photo"], unicos + descartados))  # descartados y fijos, para revisar
         nuevos = [o for o in unicos if o["label"] != "fijo"]
@@ -1151,8 +1180,9 @@ def download_ecotaxa():
         foto = f[len("objetos_"):-len(".csv")]
         with open(os.path.join(SAMPLES_DIR, f), newline="") as fh:
             for r in csv.DictReader(fh):
-                if not r.get("recorte") or not os.path.exists(os.path.join(SAMPLES_DIR, r["recorte"])):
-                    continue
+                if (r.get("label") in ("fijo", "descartado") or not r.get("recorte")
+                        or not os.path.exists(os.path.join(SAMPLES_DIR, r["recorte"]))):
+                    continue                    # pegados al capilar (se repetirían en cada muestra) y borrosos, fuera
                 fila = {"img_file_name": os.path.basename(r["recorte"]), "img_rank": 1,
                         "object_id": os.path.splitext(os.path.basename(r["recorte"]))[0],
                         "object_date": t.strftime("%Y%m%d"), "object_time": t.strftime("%H%M%S"),

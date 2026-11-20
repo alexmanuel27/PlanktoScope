@@ -18,11 +18,13 @@ print([(f["muestra"], f["objetos"], f["fijos"]) for f in s["filas"]], s["error"]
 logs = []
 while not q.empty(): logs.append(q.get())
 print([l.split("] ")[1] for l in logs if l.split("] ")[1].startswith("Objetos")])
-assert s["filas"][0]["fijos"] == 0 and s["filas"][1]["fijos"] == 0          # hacen falta 2 muestras previas
+# la suciedad se reconoce en la 3.ª muestra y entonces se descuenta también en la 1.ª y la 2.ª (y en sus objetos_N.csv)
+assert s["filas"][0]["fijos"] >= 3 and s["filas"][1]["fijos"] >= 3, "fijos atrasados sin descontar"
+assert any(r["label"] == "fijo" for r in csv.DictReader(open(os.path.join(app.SAMPLES_DIR, f"objetos_{s['filas'][0]['foto']}.csv"))))
 assert all(f["fijos"] >= 3 for f in s["filas"][2:5]), "la suciedad debe salir como fija desde la 3.ª muestra"
 assert all(f["fijos"] <= 6 for f in s["filas"]), "las algas nuevas no deben salir como fijas"
 # desde la 6.ª hay 5 fotos para la mediana: la suciedad queda en el fondo y ya ni se detecta (como en el PlanktoScope)
 obj = [l for l in logs if l.split("] ")[1].startswith("Objetos")]
-assert "mediana de la serie" in obj[5] and s["filas"][5]["fijos"] == 0
+assert "mediana de la serie" in obj[5] and s["filas"][5]["fijos"] <= 1   # a veces un alga cae donde estaba la suciedad
 fila = list(csv.DictReader(open(os.path.join(app.SAMPLES_DIR, s["fichero"]))))[-1]; assert "fijos" in fila
 print("FIJOS OK")

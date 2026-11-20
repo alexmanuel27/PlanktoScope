@@ -1,0 +1,3 @@
+sesion,fecha,origen,especie_cultivo,edad_cultivo_dias,dilucion,operador,fotos_desde,fotos_hasta,serie,um_por_px,particion,notas
+S003,2026-11-20,otro,aguaDestilada,,1:1,Daniela,14,35,serie_9.csv serie_10.csv serie_11.csv,0.0,,Volumen total analizado: 22.5 mL
+S004,2026-11-20,cultivo,Chlorella vulgaris,20,1:1,Daniela,36,50,serie_12.csv,1.3,,Volumen total analizado: 108ml en series de 40 ml. Cultivos preparados con la especie crecidas en medio BG-11

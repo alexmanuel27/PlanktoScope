@@ -630,10 +630,22 @@ if CAMERA_AVAILABLE:
         return sorted(capas, key=lambda c: -len(c[1]))[:maximo]
 
     def apilar(fotos):
-        """Apilado de foco: cada píxel se toma de la foto donde esa zona está más nítida."""
-        nit = np.stack([cv2.GaussianBlur(np.abs(cv2.Laplacian(cv2.cvtColor(f, cv2.COLOR_BGR2GRAY), cv2.CV_32F, ksize=3)), (0, 0), 4)
+        """Apilado de foco: donde hay algo nítido, cada píxel sale de la capa más nítida; en el fondo liso, media de las capas.
+        Antes se elegía capa en todo el fondo y, como cada capa tiene distinto brillo, salían manchas grises (20/11)."""
+        alto, ancho = fotos[0].shape[:2]
+        ref = np.median(fotos[0].reshape(-1, 3), 0)
+        fotos = np.stack([np.clip(f * (ref / np.maximum(np.median(f.reshape(-1, 3), 0), 1)), 0, 255)
+                          for f in fotos]).astype(np.float32)          # mismo brillo de fondo en todas las capas
+        # nitidez a escala 640×480 también para la foto grande, para que el mapa de capas no dependa de la resolución
+        nit = np.stack([cv2.GaussianBlur(np.abs(cv2.Laplacian(cv2.cvtColor(cv2.resize(f, (640, 480), interpolation=cv2.INTER_AREA),
+                                                                      cv2.COLOR_BGR2GRAY), cv2.CV_32F, ksize=3)), (0, 0), 4)
                         for f in fotos])
-        return np.take_along_axis(np.stack(fotos), nit.argmax(0)[None, :, :, None], 0)[0]
+        mx = nit.max(0)
+        peso = cv2.GaussianBlur(np.clip(mx / max(float(np.median(mx)), 1e-6) - 1.5, 0, 1), (0, 0), 3)  # 0 en fondo (≈ ruido), 1 con detalle
+        capa = cv2.resize(nit.argmax(0).astype(np.uint8), (ancho, alto), interpolation=cv2.INTER_NEAREST).astype(np.intp)
+        peso = cv2.resize(peso, (ancho, alto))[..., None]
+        elegida = np.take_along_axis(fotos, capa[None, :, :, None], 0)[0]
+        return (peso * elegida + (1 - peso) * fotos.mean(0)).astype(np.uint8)
 
     def mismo_lugar(a, b):
         """El centro de una caja cae dentro de la otra."""
